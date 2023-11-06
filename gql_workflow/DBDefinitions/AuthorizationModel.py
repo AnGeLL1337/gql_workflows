@@ -18,4 +18,5 @@ class AuthorizationModel(BaseModel):
 
     __tablename__ = "awauthorizations"
 
+    # Unikátny identifikátor autorizácie
     id = UUIDColumn()

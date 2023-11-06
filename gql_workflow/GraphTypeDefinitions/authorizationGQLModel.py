@@ -2,10 +2,11 @@ import datetime
 import strawberry
 from typing import List, Optional, Union, Annotated, TYPE_CHECKING
 
+# Funkcia na získanie DataLoaderov
 def getLoaders(info):
     return info.context["all"]
 
-
+# Annotácie na definíciu typov
 GroupTypeGQLModel = Annotated["GroupTypeGQLModel", strawberry.lazy(".externals")]
 AuthorizationUserGQLModel = Annotated["AuthorizationUserGQLModel", strawberry.lazy(".authorizationUserGQLModel")]
 AuthorizationGroupGQLModel = Annotated["AuthorizationGroupGQLModel", strawberry.lazy(".authorizationGroupGQLModel")]
@@ -14,7 +15,10 @@ AuthorizationRoleTypeGQLModel = Annotated["AuthorizationRoleTypeGQLModel", straw
 @strawberry.federation.type(
     keys=["id"], description="""Entity representing an access to information"""
 )
+
+# Definícia GQL modelu AuthorizationGQLModel
 class AuthorizationGQLModel:
+    # Metóda na riešenie referencie
     @classmethod
     async def resolve_reference(cls, info: strawberry.types.Info, id: strawberry.ID):
         loader = getLoaders(info).authorizations
@@ -24,6 +28,7 @@ class AuthorizationGQLModel:
             result.__strawberry_definition__ = cls._type_definition # some version of strawberry changed :(
         return result
 
+    # Polia modelu
     @strawberry.field(description="""Entity primary key""")
     def id(self, info: strawberry.types.Info) -> strawberry.ID:
         return self.id
