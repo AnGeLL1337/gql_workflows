@@ -68,14 +68,14 @@ class AuthorizationRoleTypeGQLModel:
 #
 #####################################################################
 
-@strawberry.input
+@strawberry.input(description="Definition of authorization added to role")
 class AuthorizationAddRoleGQLModel:
     authorization_id: strawberry.ID # Identifikátor autorizace
     roletype_id: strawberry.ID # Identifikátor typu role
     group_id: strawberry.ID # Identifikátor skupiny
     accesslevel: int # Úroveň přístupu
 
-@strawberry.input
+@strawberry.input(description="Definition of authorization removed from role")
 class AuthorizationRemoveRoleGQLModel:
     authorization_id: strawberry.ID # Identifikátor autorizace
     role_type_id: strawberry.ID # Identifikátor typu role

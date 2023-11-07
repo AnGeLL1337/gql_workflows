@@ -62,13 +62,13 @@ class AuthorizationUserGQLModel:
 #####################################################################
 
 
-@strawberry.input
+@strawberry.input(description="Definition of authorization added to user")
 class AuthorizationAddUserGQLModel:
     authorization_id: strawberry.ID # Identifikátor autorizace
     user_id: strawberry.ID # Identifikátor uživatele
     accesslevel: int # Úroveň přístupu
 
-@strawberry.input
+@strawberry.input(description="Definition of authorization removed from user")
 class AuthorizationRemoveUserGQLModel:
     authorization_id: strawberry.ID # Identifikátor autorizace
     user_id: strawberry.ID # Identifikátor uživatele
