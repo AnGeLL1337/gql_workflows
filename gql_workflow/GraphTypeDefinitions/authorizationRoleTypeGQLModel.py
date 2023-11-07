@@ -4,20 +4,24 @@ from typing import List, Optional, Union, Annotated
 
 import gql_workflow.GraphTypeDefinitions
 
+# Funkce na získání DataLoaderů
 def getLoaders(info):
     return info.context["all"]
 
+# Anotace na definici typů
 AuthorizationGQLModel = Annotated["AuthorizationGQLModel", strawberry.lazy(".authorizationGQLModel")]
 AuthorizationResultGQLModel = Annotated["AuthorizationResultGQLModel", strawberry.lazy(".authorizationGQLModel")]
 
 RoleTypeGQLModel = Annotated["RoleTypeGQLModel", strawberry.lazy(".externals")]
 GroupGQLModel = Annotated["GroupGQLModel", strawberry.lazy(".externals")]
 
+# Definice GQL modelu AuthorizationRoleTypeGQLModel
 @strawberry.federation.type(
     keys=["id"], description="""Entity representing an access to information"""
 )
 class AuthorizationRoleTypeGQLModel:
     @classmethod
+    # Metoda na řešení reference
     async def resolve_reference(cls, info: strawberry.types.Info, id: strawberry.ID):
         loader = getLoaders(info).authorizationusers
         result = await loader.load(id)
@@ -26,6 +30,7 @@ class AuthorizationRoleTypeGQLModel:
             result.__strawberry_definition__ = cls._type_definition # some version of strawberry changed :(
         return result
 
+    # Pole modelu
     @strawberry.field(description="""Entity primary key""")
     def id(self, info: strawberry.types.Info) -> strawberry.ID:
         return self.id
@@ -65,16 +70,16 @@ class AuthorizationRoleTypeGQLModel:
 
 @strawberry.input
 class AuthorizationAddRoleGQLModel:
-    authorization_id: strawberry.ID
-    roletype_id: strawberry.ID
-    group_id: strawberry.ID
-    accesslevel: int
+    authorization_id: strawberry.ID # Identifikátor autorizace
+    roletype_id: strawberry.ID # Identifikátor typu role
+    group_id: strawberry.ID # Identifikátor skupiny
+    accesslevel: int # Úroveň přístupu
 
 @strawberry.input
 class AuthorizationRemoveRoleGQLModel:
-    authorization_id: strawberry.ID
-    role_type_id: strawberry.ID
-    group_id: strawberry.ID
+    authorization_id: strawberry.ID # Identifikátor autorizace
+    role_type_id: strawberry.ID # Identifikátor typu role
+    group_id: strawberry.ID # Identifikátor skupiny
 
 
 

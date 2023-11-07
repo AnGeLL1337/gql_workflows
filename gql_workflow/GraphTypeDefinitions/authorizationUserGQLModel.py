@@ -4,18 +4,22 @@ from typing import List, Optional, Union, Annotated
 
 import gql_workflow.GraphTypeDefinitions
 
+# Funkce na získání DataLoaderů
 def getLoaders(info):
     return info.context["all"]
 
+# Anotace na definici typů
 AuthorizationGQLModel = Annotated["AuthorizationGQLModel", strawberry.lazy(".authorizationGQLModel")]
 AuthorizationResultGQLModel = Annotated["AuthorizationResultGQLModel", strawberry.lazy(".authorizationGQLModel")]
 UserGQLModel = Annotated["UserGQLModel", strawberry.lazy(".externals")]
 
+# Definice GQL modelu AuthorizationUserGQLModel
 @strawberry.federation.type(
     keys=["id"], description="""Entity representing an access to information"""
 )
 class AuthorizationUserGQLModel:
     @classmethod
+    # Metoda na řešení reference
     async def resolve_reference(cls, info: strawberry.types.Info, id: strawberry.ID):
         loader = getLoaders(info).authorizationusers
         result = await loader.load(id)
@@ -24,7 +28,7 @@ class AuthorizationUserGQLModel:
             result.__strawberry_definition__ = cls._type_definition # some version of strawberry changed :(
         return result
 
-
+    # Pole modelu
     @strawberry.field(description="""Entity primary key""")
     def id(self, info: strawberry.types.Info) -> strawberry.ID:
         return self.id
@@ -60,14 +64,14 @@ class AuthorizationUserGQLModel:
 
 @strawberry.input
 class AuthorizationAddUserGQLModel:
-    authorization_id: strawberry.ID
-    user_id: strawberry.ID
-    accesslevel: int
+    authorization_id: strawberry.ID # Identifikátor autorizace
+    user_id: strawberry.ID # Identifikátor uživatele
+    accesslevel: int # Úroveň přístupu
 
 @strawberry.input
 class AuthorizationRemoveUserGQLModel:
-    authorization_id: strawberry.ID
-    user_id: strawberry.ID
+    authorization_id: strawberry.ID # Identifikátor autorizace
+    user_id: strawberry.ID # Identifikátor uživatele
 
 
 
