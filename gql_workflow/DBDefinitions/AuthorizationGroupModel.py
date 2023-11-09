@@ -17,28 +17,20 @@ class AuthorizationGroupModel(BaseModel):
 
     __tablename__ = "awauthorizationgroups"
 
-    # Unikátny identifikátor skupiny
-    id = UUIDColumn()
+    id = UUIDColumn(comment="Unikátny identifikátor skupiny")
 
-    # Identifikátor autorizácie (foreign key) a indexovaný stĺpec
-    authorization_id = Column(ForeignKey("awauthorizations.id"), index=True)
+    authorization_id = Column(ForeignKey("awauthorizations.id"), index=True, comment="Identifikátor autorizácie (foreign key) a indexovaný stĺpec")
     #authorization = relationship("AuthorizationModel", back_populates="groupaccesses")
 
-    # Identifikátor skupiny (foreign key) s možnosťou null hodnoty
-    group_id = UUIDFKey(nullable=True)#Column(ForeignKey("groups.id"), index=True)
+    group_id = UUIDFKey(nullable=True, comment="Identifikátor skupiny (foreign key) s možnosťou null hodnoty")#Column(ForeignKey("groups.id"), index=True)
 
-    # Úroveň prístupu v podobe celého čísla
-    accesslevel = Column(Integer)
+    accesslevel = Column(Integer, comment="Úroveň prístupu v podobe celého čísla")
 
-    # Dátum a čas vytvorenia záznamu, server default nastavený na aktuálny čas
     created = Column(DateTime, server_default=sqlalchemy.sql.func.now(),
-                     comment="FK používateľa, ktorý vytvoril tento záznam")
+                     comment="Dátum a čas vytvorenia záznamu")
 
-    # Dátum a čas poslednej zmeny, server default nastavený na aktuálny čas
-    lastchange = Column(DateTime, server_default=sqlalchemy.sql.func.now())
+    lastchange = Column(DateTime, server_default=sqlalchemy.sql.func.now(), comment="Dátum a čas poslednej zmeny")
 
-    # Identifikátor používateľa, ktorý vykonal poslednú zmenu, možno null hodnota
-    changedby = UUIDFKey(nullable=True)  # Column(ForeignKey("users.id"), index=True, nullable=True)
+    changedby = UUIDFKey(nullable=True, comment="Identifikátor používateľa, ktorý vykonal poslednú zmenu")  # Column(ForeignKey("users.id"), index=True, nullable=True)
 
-    # Identifikátor používateľa, ktorý vytvoril tento záznam, možno null hodnota
-    createdby = UUIDFKey(nullable=True)  # Column(ForeignKey("users.id"), index=True, nullable=True)
+    createdby = UUIDFKey(nullable=True, comment="Identifikátor používateľa, ktorý vytvoril tento záznam")  # Column(ForeignKey("users.id"), index=True, nullable=True)

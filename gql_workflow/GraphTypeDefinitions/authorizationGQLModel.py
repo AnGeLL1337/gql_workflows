@@ -57,7 +57,7 @@ class AuthorizationGQLModel:
 #
 #####################################################################
 
-@strawberry.field(description="""Finds an authorization entity by its id""")
+@strawberry.field(description="""Finds an authorization entity by its id""") #I am not sure there
 async def authorization_by_id(
     self, info: strawberry.types.Info, id: strawberry.ID
 ) -> Union["AuthorizationGQLModel", None]:
@@ -79,11 +79,11 @@ async def authorization_page(
 #####################################################################
 
 
-@strawberry.input
+@strawberry.input(description="""Definition of authorization added to user""")
 class AuthorizationInsertGQLModel:
     id: Optional[strawberry.ID] = None
 
-@strawberry.type
+@strawberry.type(description="""Result of authorization operation""")
 class AuthorizationResultGQLModel:
     id: strawberry.ID = None
     msg: str = None

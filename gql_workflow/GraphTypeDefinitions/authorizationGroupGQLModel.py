@@ -61,7 +61,7 @@ class AuthorizationGroupGQLModel:
 #
 #####################################################################
 
-@strawberry.input
+@strawberry.input(description="""Definition of authorization added to group""")
 class AuthorizationAddGroupGQLModel:
     """Vstupný model pre pridanie alebo aktualizáciu skupiny v autorizácii."""
     authorization_id: strawberry.ID  # Identifikátor autorizácie
@@ -69,7 +69,7 @@ class AuthorizationAddGroupGQLModel:
     accesslevel: int  # Úroveň prístupu
 
 
-@strawberry.input
+@strawberry.input(description="""Definition of authorization removed from group""")
 class AuthorizationRemoveGroupGQLModel:
     """Vstupný model pre odstránenie skupiny z autorizácie."""
     authorization_id: strawberry.ID  # Identifikátor autorizácie
