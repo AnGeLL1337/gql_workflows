@@ -2,6 +2,8 @@ import datetime
 import strawberry
 from typing import List, Optional, Union, Annotated
 
+from sqlalchemy.util import typing
+
 import gql_workflow.GraphTypeDefinitions
 
 # Funkcia na získanie DataLoaderov
@@ -53,8 +55,20 @@ class AuthorizationGroupGQLModel:
 #
 #####################################################################
 
+@strawberry.field(description="""Gets a page of group authorizations """)
+async def authorization_group_page(
+    self, info: strawberry.types.Info, skip: int = 0, limit: int = 20
+) -> List["AuthorizationGroupGQLModel"]:
+    loader = getLoaders(info).authorizationgroups
+    result = await loader.page(skip=skip, limit=limit)
+    return result
 
-    
+@strawberry.field(description="Retrieves a group authorization by its id")
+async def authorization_group_by_id(
+    self, info: strawberry.types.Info, id: strawberry.ID
+) -> typing.Optional[AuthorizationGroupGQLModel]:
+    result = await AuthorizationGroupGQLModel.resolve_reference(info=info, id=id)
+    return result
 #####################################################################
 #
 # Mutation section
