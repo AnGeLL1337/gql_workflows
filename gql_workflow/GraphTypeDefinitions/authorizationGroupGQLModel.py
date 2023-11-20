@@ -23,7 +23,7 @@ class AuthorizationGroupGQLModel:
     # Metóda na riešenie referencie
     @classmethod
     async def resolve_reference(cls, info: strawberry.types.Info, id: strawberry.ID):
-        loader = getLoaders(info).authorizationusers
+        loader = getLoaders(info).authorizationgroups
         result = await loader.load(id)
         if result is not None:
             result._type_definition = cls._type_definition  # little hack :)
@@ -45,7 +45,7 @@ class AuthorizationGroupGQLModel:
         return result
     
     @strawberry.field(description="""Group which has this access""")
-    async def group(self, info: strawberry.types.Info) -> Optional["GroupGQLModel"]:
+    async def group(self, info: strawberry.types.Info) -> GroupGQLModel:
         result = gql_workflow.GraphTypeDefinitions.GroupGQLModel(id=self.group_id)
         return result
 
