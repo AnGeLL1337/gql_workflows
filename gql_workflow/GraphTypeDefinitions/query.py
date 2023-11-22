@@ -19,6 +19,12 @@ class Query:
 
     from .authorizationUserGQLModel import authorization_user_page
     authorization_user_page = authorization_user_page
+    
+    from .authorizationRoleTypeGQLModel import authorization_roletype_by_id
+    authorization_roletype_by_id = authorization_roletype_by_id
+
+    from .authorizationRoleTypeGQLModel import authorization_roletype_page
+    authorization_roletype_page = authorization_roletype_page
 
     from .workflowGQLModel import workflow_by_id
     workflow_by_id = workflow_by_id
