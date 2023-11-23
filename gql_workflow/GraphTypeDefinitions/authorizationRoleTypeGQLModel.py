@@ -25,7 +25,7 @@ class AuthorizationRoleTypeGQLModel:
     @classmethod
     # Metoda na řešení reference
     async def resolve_reference(cls, info: strawberry.types.Info, id: strawberry.ID):
-        loader = getLoaders(info).authorizationusers
+        loader = getLoaders(info).authorizationroletypes
         result = await loader.load(id)
         if result is not None:
             result._type_definition = cls._type_definition  # little hack :)
@@ -47,7 +47,7 @@ class AuthorizationRoleTypeGQLModel:
         return result
     
     @strawberry.field(description="""Role type which user must play in the group to have this access""")
-    async def role_type(self, info: strawberry.types.Info) -> Optional["RoleTypeGQLModel"]:
+    async def role_type(self, info: strawberry.types.Info) -> RoleTypeGQLModel:
         result = gql_workflow.GraphTypeDefinitions.RoleTypeGQLModel(id=self.roletype_id)
         return result
     
