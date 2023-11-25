@@ -26,9 +26,4 @@ class Query:
     from .authorizationRoleTypeGQLModel import authorization_roletype_page
     authorization_roletype_page = authorization_roletype_page
 
-    from .workflowGQLModel import workflow_by_id
-    workflow_by_id = workflow_by_id
-
-    from .workflowGQLModel import workflow_page
-    workflow_page = workflow_page
     

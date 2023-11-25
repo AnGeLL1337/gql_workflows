@@ -6,6 +6,7 @@ logging.basicConfig(
     datefmt='%Y-%m-%dT%I:%M:%S')
 
 from fastapi import FastAPI, Request
+import strawberry
 from strawberry.fastapi import GraphQLRouter
 from contextlib import asynccontextmanager
 
@@ -33,7 +34,7 @@ async def initEngine(app: FastAPI):
 
     asyncSessionMaker = await startEngine(
         connectionstring=connectionstring,
-        makeDrop=True,
+        makeDrop=False,
         makeUp=True
     )
 

@@ -7,7 +7,6 @@ sys.path.append("../gql_workflow")
 
 from DBDefinitions import BaseModel
 from DBDefinitions import AuthorizationModel, AuthorizationGroupModel, AuthorizationUserModel, AuthorizationRoleTypeModel
-from DBDefinitions import WorkflowModel, WorkflowStateModel, WorkflowStateRoleTypeModel, WorkflowStateUserModel
 
 
 async def prepare_in_memory_sqllite():
@@ -41,10 +40,6 @@ async def prepare_demodata(async_session_maker):
             AuthorizationUserModel, 
             AuthorizationRoleTypeModel,
 
-            WorkflowModel, 
-            WorkflowStateModel, 
-            WorkflowStateRoleTypeModel, 
-            WorkflowStateUserModel
         ],
         data,
     )
