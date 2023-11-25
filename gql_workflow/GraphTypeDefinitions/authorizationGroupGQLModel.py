@@ -3,8 +3,11 @@ import strawberry
 from typing import List, Optional, Union, Annotated
 
 from sqlalchemy.util import typing
+from uoishelpers import uuid
 
 import gql_workflow.GraphTypeDefinitions
+from gql_workflow.Dataloaders import getUserFromInfo
+
 
 # Funkcia na získanie DataLoaderov
 def getLoaders(info):
@@ -19,6 +22,7 @@ AuthorizationResultGQLModel = Annotated["AuthorizationResultGQLModel", strawberr
 @strawberry.federation.type(
     keys=["id"], description="""Entity representing an access to information"""
 )
+
 class AuthorizationGroupGQLModel:
     # Metóda na riešenie referencie
     @classmethod
@@ -82,6 +86,13 @@ class AuthorizationAddGroupGQLModel:
     group_id: strawberry.ID  # Identifikátor skupiny
     accesslevel: int  # Úroveň prístupu
 
+@strawberry.input(description="""Definition of authorization update group""")
+class AuthorizationUpdateGroupGQLModel:
+    """Vstupný model pre aktualizáciu skupiny v autorizácii."""
+    authorization_id: strawberry.ID = strawberry.field(description="Identifikátor autorizácie")
+    group_id: strawberry.ID = strawberry.field(description="Identifikátor skupiny")
+    lastchange: datetime.datetime
+    accesslevel: typing.Optional[int] = strawberry.field(description="Úroveň prístupu")
 
 @strawberry.input(description="""Definition of authorization removed from group""")
 class AuthorizationRemoveGroupGQLModel:
@@ -91,7 +102,8 @@ class AuthorizationRemoveGroupGQLModel:
 
 
 @strawberry.mutation(description="""Adds or updates a group at the authorization""")
-async def authorization_add_group(self, info: strawberry.types.Info, authorization: AuthorizationAddGroupGQLModel) -> Optional["AuthorizationResultGQLModel"]:
+async def authorization_add_group(self, info: strawberry.types.Info, authorization: AuthorizationAddGroupGQLModel) \
+        -> Optional["AuthorizationResultGQLModel"]:
     """Mutácia pre pridanie alebo aktualizáciu skupiny v autorizácii."""
     loader = getLoaders(info).authorizationgroups
     existing = await loader.filter_by(authorization_id=authorization.authorization_id, group_id=authorization.group_id)
@@ -108,6 +120,30 @@ async def authorization_add_group(self, info: strawberry.types.Info, authorizati
             result.msg = "fail"
         result.id = authorization.authorization_id
     return result
+
+@strawberry.mutation(description="""Updates a group at the authorization""")
+async def authorization_update_group(self, info: strawberry.types.Info, authorization: AuthorizationUpdateGroupGQLModel) \
+        -> Optional["AuthorizationResultGQLModel"]:
+    loader = getLoaders(info).authorizationgroups  # Načítaj skupinu pomocou loaderu
+    existing = await loader.filter_by(authorization_id=authorization.authorization_id, group_id=authorization.group_id)
+    #existing = next(existing, None)
+
+    if existing:
+        # Priraď user ID alebo iný identifikátor z info do `changedby`
+        user = getUserFromInfo(info)
+        existing.changedby = uuid.UUID(user["id"])
+
+        existing.lastchange = datetime.datetime.now()  # Nastav lastchange na aktuálny čas
+
+        result = gql_workflow.GraphTypeDefinitions.AuthorizationResultGQLModel(id=existing.group_id, msg="ok")  # Vytvor výsledok s ID skupiny a predvolenou správou "ok"
+
+        row = await loader.update(existing)  # Aktualizuj skupinu pomocou definovaného loaderu
+
+        result.msg = "fail" if row is None else "ok"  # Nastav správu výsledku podľa úspechu aktualizácie
+        return result  # Vráť výsledok
+
+    return gql_workflow.GraphTypeDefinitions.AuthorizationResultGQLModel(id=None, msg="Group not found")  # Ak skupina neexistuje, vráť výsledok s oznamom, že skupina nebola nájdená
+
 
 @strawberry.mutation(description="""Remove the group from the authorization""")
 async def authorization_remove_group(self, info: strawberry.types.Info, authorization: AuthorizationRemoveGroupGQLModel) -> Optional["AuthorizationResultGQLModel"]:
