@@ -20,9 +20,4 @@ class Query:
     from .authorizationUserGQLModel import authorization_user_page
     authorization_user_page = authorization_user_page
 
-    from .workflowGQLModel import workflow_by_id
-    workflow_by_id = workflow_by_id
-
-    from .workflowGQLModel import workflow_page
-    workflow_page = workflow_page
     

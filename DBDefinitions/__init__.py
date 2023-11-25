@@ -2,17 +2,12 @@ import sqlalchemy
 
         
 from .Base import BaseModel
-from .UUID import UUIDColumn
+from .uuid import UUIDColumn
 
 from .AuthorizationGroupModel import AuthorizationGroupModel
 from .AuthorizationModel import AuthorizationModel
 from .AuthorizationRoleTypeModel import AuthorizationRoleTypeModel
 from .AuthorizationUserModel import AuthorizationUserModel
-from .WorkflowModel import WorkflowModel
-from .WorkflowStateModel import WorkflowStateModel
-from .WorkflowStateRoleTypeModel import WorkflowStateRoleTypeModel
-from .WorkflowStateUserModel import WorkflowStateUserModel
-from .WorkflowTransitionModel import WorkflowTransitionModel
 
 
 from sqlalchemy import create_engine

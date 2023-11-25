@@ -1,14 +1,10 @@
+import datetime
 
 from uoishelpers.dataloaders import createIdLoader
 import logging
 from functools import cache
 
 from DBDefinitions import (
-    WorkflowModel,
-    WorkflowStateModel,
-    WorkflowStateRoleTypeModel,
-    WorkflowStateUserModel,
-    WorkflowTransitionModel,
     AuthorizationGroupModel,
     AuthorizationModel,
     AuthorizationRoleTypeModel,
@@ -16,13 +12,8 @@ from DBDefinitions import (
 )
 
 dbmodels = {
-    "workflows": WorkflowModel,
-    "workflowstates": WorkflowStateModel,
-    "workflowstateroletypes": WorkflowStateRoleTypeModel,
-    "workflowstateusers": WorkflowStateUserModel,
-    "workflowtransitions": WorkflowTransitionModel,
-    "authorizationgroups": AuthorizationGroupModel,
     "authorizations": AuthorizationModel,
+    "authorizationgroups": AuthorizationGroupModel,
     "authorizationroletypes": AuthorizationRoleTypeModel,
     "authorizationusers": AuthorizationUserModel
 }
@@ -31,6 +22,7 @@ import aiohttp
 import asyncio
 import os
 from aiodataloader import DataLoader
+from uoishelpers.resolvers import select, update, delete
 
 
 def prepareSelect(model, where: dict):
@@ -154,12 +146,14 @@ def prepareSelect(model, where: dict):
     result = baseStatement.filter(filterStatement)
     return result
 
+
 @cache
 def composeAuthUrl():
     hostname = os.environ.get("AUTHURL", "http://localhost:8088/gql")
     assert "://" in hostname, "probably bad formated url, has it 'protocol' part?"
     assert "." not in hostname, "security check failed, change source code"
     return hostname
+
 
 class AuthorizationLoader(DataLoader):
     query = """
@@ -231,6 +225,108 @@ class AuthorizationLoader(DataLoader):
         return results
 
 
+def createIdLoader(asyncSessionMaker, dbModel):
+    mainstmt = select(dbModel)
+    filtermethod = dbModel.id.in_
+
+    class Loader(DataLoader):
+        async def batch_load_fn(self, keys):
+            # print('batch_load_fn', keys, flush=True)
+            async with asyncSessionMaker() as session:
+                statement = mainstmt.filter(filtermethod(keys))
+                rows = await session.execute(statement)
+                rows = rows.scalars()
+                # return rows
+                datamap = {}
+                for row in rows:
+                    datamap[row.id] = row
+                result = [datamap.get(id, None) for id in keys]
+                return result
+
+        async def insert(self, entity, extraAttributes={}):
+            newdbrow = dbModel()
+            newdbrow = update(newdbrow, entity, extraAttributes)
+            async with asyncSessionMaker() as session:
+                session.add(newdbrow)
+                await session.commit()
+            return newdbrow
+
+        async def update(self, entity, extraValues={}):
+            async with asyncSessionMaker() as session:
+                statement = mainstmt.filter_by(id=entity.id)
+                rows = await session.execute(statement)
+                rows = rows.scalars()
+                rowToUpdate = next(rows, None)
+
+                if rowToUpdate is None:
+                    return None
+
+                dochecks = hasattr(rowToUpdate, 'lastchange')
+                checkpassed = True
+                if (dochecks):
+                    if (entity.lastchange != rowToUpdate.lastchange):
+                        result = None
+                        checkpassed = False
+                    else:
+                        entity.lastchange = datetime.datetime.now()
+                if checkpassed:
+                    rowToUpdate = update(rowToUpdate, entity, extraValues=extraValues)
+                    await session.commit()
+                    result = rowToUpdate
+                    self.registerResult(result)
+            return result
+
+        async def delete(self, id):
+            statement = delete(dbModel).where(dbModel.id == id)
+            async with asyncSessionMaker() as session:
+                result = await session.execute(statement)
+                await session.commit()
+                self.clear(id)
+                return result
+
+        def registerResult(self, result):
+            self.clear(result.id)
+            self.prime(result.id, result)
+            return result
+
+        def getSelectStatement(self):
+            return select(dbModel)
+
+        def getModel(self):
+            return dbModel
+
+        def getAsyncSessionMaker(self):
+            return asyncSessionMaker
+
+        async def execute_select(self, statement):
+            async with asyncSessionMaker() as session:
+                rows = await session.execute(statement)
+                return (
+                    self.registerResult(row)
+                    for row in rows.scalars()
+                )
+
+        async def filter_by(self, **filters):
+            statement = mainstmt.filter_by(**filters)
+            return await self.execute_select(statement)
+
+        async def page(self, skip=0, limit=10, where=None, extendedfilter=None):
+            statement = mainstmt
+            if where is not None:
+                statement = prepareSelect(dbModel, where)
+            statement = statement.offset(skip).limit(limit)
+            if extendedfilter is not None:
+                statement = statement.filter_by(**extendedfilter)
+            logging.info(f"loader.page statement {statement}")
+            return await self.execute_select(statement)
+
+        def set_cache(self, cache_object):
+            self.cache = True
+            self._cache = cache_object
+
+    return Loader(cache=True)
+
+
 class Loaders:
     authorizations = None
     authorizationgroups = None
@@ -238,13 +334,20 @@ class Loaders:
     authorizationusers = None
     pass
 
+
 def createLoaders(asyncSessionMaker, models=dbmodels) -> Loaders:
     class Loaders:
 
         @property
         @cache
+        # TODO: Možno budeme musieť zmazať
         def authorizations(self):
             return AuthorizationLoader()
+
+        @property
+        @cache
+        def authorization(self):
+            return createIdLoader(asyncSessionMaker, models["authorizations"])
 
         @property
         @cache
@@ -272,15 +375,17 @@ def createLoaders(asyncSessionMaker, models=dbmodels) -> Loaders:
         Loaders = type('Loaders', (), attrs)   
         return Loaders()
         '''
+
     return Loaders()
+
 
 def getLoadersFromInfo(info) -> Loaders:
     context = info.context
     loaders = context["loaders"]
     return loaders
 
-from functools import cache
 
+from functools import cache
 
 demouser = {
     "id": "2d9dc5ca-a4a2-11ed-b9df-0242ac120003",
@@ -312,9 +417,11 @@ demouser = {
         }
     ]
 }
+
+
 def getUserFromInfo(info):
     context = info.context
-    #print(list(context.keys()))
+    # print(list(context.keys()))
     result = context.get("user", None)
     if result is None:
         authorization = context["request"].headers.get("Authorization", None)
@@ -326,6 +433,7 @@ def getUserFromInfo(info):
                     context["user"] = result
     logging.debug("getUserFromInfo", result)
     return result
+
 
 def createLoadersContext(asyncSessionMaker):
     return {

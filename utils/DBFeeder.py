@@ -4,12 +4,7 @@ from DBDefinitions import (
     AuthorizationModel,
     AuthorizationGroupModel,
     AuthorizationRoleTypeModel,
-    AuthorizationUserModel,
-    WorkflowModel,
-    WorkflowStateModel,
-    WorkflowStateRoleTypeModel,
-    WorkflowStateUserModel,
-    WorkflowTransitionModel
+    AuthorizationUserModel
 )
 
 
@@ -183,12 +178,7 @@ async def initDB(asyncSessionMaker):
             AuthorizationModel,
             AuthorizationGroupModel,
             AuthorizationRoleTypeModel,
-            AuthorizationUserModel,
-            WorkflowModel,
-            WorkflowStateModel,
-            WorkflowStateRoleTypeModel,
-            WorkflowStateUserModel,
-            WorkflowTransitionModel
+            AuthorizationUserModel
         ]
 
     jsonData = get_demodata()

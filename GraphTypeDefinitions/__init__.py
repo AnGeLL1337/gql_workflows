@@ -68,12 +68,13 @@ class Mutation:
     from .authorizationRoleTypeGQLModel import authorization_remove_role
     authorization_remove_role = authorization_remove_role
 
+'''
     from .authorizationUserGQLModel import authorization_add_user
     authorization_add_user = authorization_add_user
 
     from .authorizationUserGQLModel import authorization_remove_user
     authorization_remove_user = authorization_remove_user
-
+    
     from .workflowGQLModel import workflow_insert
     workflow_insert = workflow_insert
 
@@ -106,7 +107,7 @@ class Mutation:
 
     from .workflowStateRoleTypeGQLModel import workflow_state_remove_role
     workflow_state_remove_role = workflow_state_remove_role
-
+'''
 
 schema = strawberry.federation.Schema(Query, types=[
     AuthorizationGQLModel, AuthorizationGroupGQLModel, AuthorizationRoleTypeGQLModel, AuthorizationUserGQLModel],

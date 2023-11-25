@@ -1,30 +1,27 @@
-import datetime
 import strawberry
-from typing import List, Optional, Union, Annotated
+import uuid
 
-def getLoaders(info):
-    return info.context["all"]
+@classmethod
+async def resolve_reference(cls, info: strawberry.types.Info, id: uuid.UUID):
+    return cls(id=id)
+
+class BaseEternal:
+    id: uuid.UUID = strawberry.federation.field(external=True)
+
 
 @strawberry.federation.type(extend=True, keys=["id"])
 class UserGQLModel:
-    id: strawberry.ID = strawberry.federation.field(external=True)
+    id: uuid.UUID = strawberry.federation.field(external=True)
+    resolve_reference = resolve_reference
 
-    @classmethod
-    async def resolve_reference(cls, id: strawberry.ID):
-        return UserGQLModel(id=id)
 
 @strawberry.federation.type(extend=True, keys=["id"])
 class RoleTypeGQLModel:
-    id: strawberry.ID = strawberry.federation.field(external=True)
+    id: uuid.UUID = strawberry.federation.field(external=True)
+    resolve_reference = resolve_reference
 
-    @classmethod
-    async def resolve_reference(cls, id: strawberry.ID):
-        return RoleTypeGQLModel(id=id)
 
 @strawberry.federation.type(extend=True, keys=["id"])
 class GroupGQLModel:
-    id: strawberry.ID = strawberry.federation.field(external=True)
-
-    @classmethod
-    async def resolve_reference(cls, id: strawberry.ID):
-        return GroupGQLModel(id=id)
+    id: uuid.UUID = strawberry.federation.field(external=True)
+    resolve_reference = resolve_reference

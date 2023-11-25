@@ -9,7 +9,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 
-from .UUID import UUIDColumn, UUIDFKey
+from .uuid import UUIDColumn, UUIDFKey
 from .Base import BaseModel
 
 class AuthorizationGroupModel(BaseModel):
@@ -17,7 +17,7 @@ class AuthorizationGroupModel(BaseModel):
 
     __tablename__ = "awauthorizationgroups"
 
-    id = UUIDColumn(comment="Unikátny identifikátor skupiny")
+    id = UUIDColumn()
 
     authorization_id = Column(ForeignKey("awauthorizations.id"), index=True, comment="Identifikátor autorizácie (foreign key) a indexovaný stĺpec")
     #authorization = relationship("AuthorizationModel", back_populates="groupaccesses")

@@ -9,14 +9,14 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 
-from .UUID import UUIDColumn, UUIDFKey
+from .uuid import UUIDColumn, UUIDFKey
 from .Base import BaseModel
 
 class AuthorizationRoleTypeModel(BaseModel):
     """Spravuje pristupove informace zalozene na rolich ve skupinach"""
 
     __tablename__ = "awauthorizationroletypes"
-    id = UUIDColumn(comment="Unikátní identifikátor skupiny")
+    id = UUIDColumn()
     
     authorization_id = Column(ForeignKey("awauthorizations.id"), index=True, comment="Identifikátor autorizace (foreign key) a indexovaný sloupec")
     #authorization = relationship("AuthorizationModel", back_populates="roletypeacesses")

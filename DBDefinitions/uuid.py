@@ -1,12 +1,9 @@
-import uuid
 from typing import Optional
+from uuid import uuid4, UUID
+from sqlalchemy import Column, Uuid
+uuid = uuid4
 
-from sqlalchemy import (
-    Column,
-    String
-)
-
-
+'''
 def newUuidAsString():
     return f"{uuid.uuid1()}"
 
@@ -20,8 +17,6 @@ def UUIDColumn(name=None, comment: Optional[str] = None):
         )
 
 
-
-
 def UUIDFKey(*, ForeignKey=None, nullable=False, comment: Optional[str] = None):
     if ForeignKey is None:
         return Column(
@@ -31,3 +26,12 @@ def UUIDFKey(*, ForeignKey=None, nullable=False, comment: Optional[str] = None):
         return Column(
             ForeignKey, index=True, nullable=nullable, comment=comment
         )
+'''
+
+
+def UUIDFKey(comment: Optional[str] = None, nullable=True, **kwargs):
+    return Column(Uuid, index=True, comment=comment, nullable=nullable, **kwargs)
+
+
+def UUIDColumn():
+    return Column(Uuid, primary_key=True, comment="primary key", default=uuid)
