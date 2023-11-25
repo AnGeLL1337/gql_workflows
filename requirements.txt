@@ -1,17 +1,25 @@
 # To ensure app dependencies are ported from your virtual environment/host machine into your container, run 'pip freeze > requirements.txt' in the terminal to overwrite this file
-fastapi[all]
+fastapi[all]~=0.104.1
 uvicorn[standard]
 gunicorn
 
 asyncpg
 
-sqlalchemy
+sqlalchemy~=2.0.23
 sqlalchemy_utils
 
 pydantic
-starlette
+starlette~=0.27.0
 strawberry-graphql
 click
-aiodataloader
+aiodataloader~=0.4.0
 
-https://github.com/hrbolek/uoishelpers/archive/refs/heads/main.zip
+uoishelpers~=0.1
+
+pip~=22.3.1
+attrs~=23.1.0
+wheel~=0.38.4
+Jinja2~=3.1.2
+setuptools~=65.5.1
+packaging~=23.2
+aiohttp~=3.9.0

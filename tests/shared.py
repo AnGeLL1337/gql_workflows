@@ -1,17 +1,13 @@
-import sqlalchemy
 import sys
-import asyncio
 
 # setting path
 sys.path.append("../gql_workflow")
 
-import pytest
-
 # from ..uoishelpers.uuid import UUIDColumn
 
-from gql_workflow.DBDefinitions import BaseModel
-from gql_workflow.DBDefinitions import AuthorizationModel, AuthorizationGroupModel, AuthorizationUserModel, AuthorizationRoleTypeModel
-from gql_workflow.DBDefinitions import WorkflowModel, WorkflowStateModel, WorkflowStateRoleTypeModel, WorkflowStateUserModel
+from DBDefinitions import BaseModel
+from DBDefinitions import AuthorizationModel, AuthorizationGroupModel, AuthorizationUserModel, AuthorizationRoleTypeModel
+from DBDefinitions import WorkflowModel, WorkflowStateModel, WorkflowStateRoleTypeModel, WorkflowStateUserModel
 
 
 async def prepare_in_memory_sqllite():
@@ -30,7 +26,7 @@ async def prepare_in_memory_sqllite():
 
     return async_session_maker
 
-from gql_workflow.DBFeeder import get_demodata
+from utils.DBFeeder import get_demodata
 
 async def prepare_demodata(async_session_maker):
     data = get_demodata()
@@ -54,7 +50,7 @@ async def prepare_demodata(async_session_maker):
     )
 
 
-from gql_workflow.Dataloaders import createLoaders
+from utils.Dataloaders import createLoaders
 
 
 async def createContext(asyncSessionMaker):

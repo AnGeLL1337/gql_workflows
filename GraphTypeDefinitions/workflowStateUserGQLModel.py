@@ -1,19 +1,19 @@
-import datetime
 import strawberry
-from typing import List, Optional, Union, Annotated
+from typing import Optional, Union, Annotated
 
-import gql_workflow.GraphTypeDefinitions
 
 def getLoaders(info):
     return info.context["all"]
 
+UserGQLModel = Annotated["UserGQLModel", strawberry.lazy(".externals")]
+GroupGQLModel = Annotated["GroupGQLModel", strawberry.lazy(".externals")]
+
 WorkflowGQLModel = Annotated["WorkflowGQLModel", strawberry.lazy(".workflowGQLModel")]
 WorkflowStateGQLModel = Annotated["WorkflowStateGQLModel", strawberry.lazy(".workflowStateGQLModel")]
 WorkflowStateResultGQLModel = Annotated["WorkflowStateResultGQLModel", strawberry.lazy(".workflowStateGQLModel")]
-RoleTypeGQLModel = Annotated["RoleTypeGQLModel", strawberry.lazy(".externals")]
 
-@strawberry.federation.type(keys=["id"], description="""Entity defining role types with some rights for the state in dataflow (node in graph)""")
-class WorkflowStateRoleTypeGQLModel:
+@strawberry.federation.type(keys=["id"], description="""Entity defining users with some rights for the state in dataflow (node in graph)""")
+class WorkflowStateUserGQLModel:
     @classmethod
     async def resolve_reference(cls, info: strawberry.types.Info, id: strawberry.ID):
         loader = getLoaders(info).workflowstateusers
@@ -32,14 +32,19 @@ class WorkflowStateRoleTypeGQLModel:
     def lastchange(self) -> strawberry.ID:
         return self.lastchange
    
+    @strawberry.field(description="""User""")
+    async def user(self, info: strawberry.types.Info) -> Union["UserGQLModel", None]:
+        result = await gql_workflow.GraphTypeDefinitions.UserGQLModel.resolve_reference(id=self.user_id)
+        return result
+
+    @strawberry.field(description="""Group for which the user has some right""")
+    async def group(self, info: strawberry.types.Info) -> Union["GroupGQLModel", None]:
+        result = await gql_workflow.GraphTypeDefinitions.GroupGQLModel.resolve_reference(id=self.group_id)
+        return result
+
     @strawberry.field(description="""State""")
     async def state(self, info: strawberry.types.Info) -> Union["WorkflowStateGQLModel", None]:
         result = await gql_workflow.GraphTypeDefinitions.WorkflowStateGQLModel.resolve_reference(info, self.workflowstate_id)
-        return result
-
-    @strawberry.field(description="""Role type with some rights""")
-    async def role_type(self, info: strawberry.types.Info) -> Union["RoleTypeGQLModel", None]:
-        result = await gql_workflow.GraphTypeDefinitions.RoleTypeGQLModel.resolve_reference(id=self.roletype_id)
         return result
 
 
@@ -57,22 +62,23 @@ class WorkflowStateRoleTypeGQLModel:
 #
 #####################################################################
 
-
 @strawberry.input(description="""""")
-class WorkflowStateAddRoleGQLModel:
+class WorkflowStateAddUserGQLModel:
     workflowstate_id: strawberry.ID = strawberry.field(default=None, description="Identification of workflow state")
-    roletype_id: strawberry.ID = strawberry.field(default=None, description="Identification of role type")
+    user_id: strawberry.ID = strawberry.field(default=None, description="Identification of user")
+    group_id: strawberry.ID = strawberry.field(default=None, description="Identification of group for which the user has appropriate access level")
     accesslevel: int
 
 @strawberry.input(description="""""")
-class WorkflowStateRemoveRoleGQLModel:
+class WorkflowStateRemoveUserGQLModel:
     workflowstate_id: strawberry.ID = strawberry.field(default=None, description="Identification of workflow state")
-    roletype_id: strawberry.ID = strawberry.field(default=None, description="Identification of role type")
+    user_id: strawberry.ID = strawberry.field(default=None, description="Identification of user")
+    group_id: strawberry.ID = strawberry.field(default=None, description="Identification of group for which the user has appropriate access level")
 
-@strawberry.mutation(description="""Adds or updates role at the workflow state""")
-async def workflow_state_add_role(self, info: strawberry.types.Info, payload: WorkflowStateAddRoleGQLModel) -> Optional["WorkflowStateResultGQLModel"]:
-    loader = getLoaders(info).workflowstateroletypes
-    existing = await loader.filter_by(workflowstate_id=payload.workflowstate_id, roletype_id=payload.roletype_id)
+@strawberry.mutation(description="""Adds or updates a user & group at the workflow state""")
+async def workflow_state_add_user(self, info: strawberry.types.Info, payload: WorkflowStateAddUserGQLModel) -> Optional["WorkflowStateResultGQLModel"]:
+    loader = getLoaders(info).workflowstateusers
+    existing = await loader.filter_by(workflowstate_id=payload.workflowstate_id, user_id=payload.user_id, group_id=payload.group_id)
     result = gql_workflow.GraphTypeDefinitions.WorkflowStateResultGQLModel()
     result.msg = "ok"
     row = next(existing, None)
@@ -87,10 +93,10 @@ async def workflow_state_add_role(self, info: strawberry.types.Info, payload: Wo
         result.id = payload.workflowstate_id
     return result
 
-@strawberry.mutation(description="""Remove the role from the workflow state""")
-async def workflow_state_remove_role(self, info: strawberry.types.Info, payload: WorkflowStateRemoveRoleGQLModel) -> Optional["WorkflowStateResultGQLModel"]:
-    loader = getLoaders(info).workflowstateroletypes
-    existing = await loader.filter_by(workflowstate_id=payload.workflowstate_id, roletype_id=payload.roletype_id)
+@strawberry.mutation(description="""Remove the user & group from the workflow state""")
+async def workflow_state_remove_user(self, info: strawberry.types.Info, payload: WorkflowStateRemoveUserGQLModel) -> Optional["WorkflowStateResultGQLModel"]:
+    loader = getLoaders(info).workflowstateusers
+    existing = await loader.filter_by(workflowstate_id=payload.workflowstate_id, user_id=payload.user_id, group_id=payload.group_id)
     existing = next(existing, None)
     result = gql_workflow.GraphTypeDefinitions.WorkflowStateResultGQLModel()
     result.id = payload.workflowstate_id

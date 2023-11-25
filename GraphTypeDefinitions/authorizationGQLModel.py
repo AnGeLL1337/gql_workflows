@@ -1,9 +1,12 @@
-import datetime
+import uuid
+
 import strawberry
-from typing import List, Optional, Union, Annotated, TYPE_CHECKING
+from typing import List, Optional, Union, Annotated
+
+import typing
 
 from .BaseGQLModel import BaseGQLModel
-
+from utils.Dataloaders import getLoadersFromInfo
 
 # Annotácie na definíciu typov
 GroupTypeGQLModel = Annotated["GroupTypeGQLModel", strawberry.lazy(".externals")]
@@ -17,6 +20,11 @@ AuthorizationRoleTypeGQLModel = Annotated["AuthorizationRoleTypeGQLModel", straw
 
 # Definícia GQL modelu AuthorizationGQLModel
 class AuthorizationGQLModel(BaseGQLModel):
+    @classmethod
+    def getLoader(cls, info):
+        return getLoadersFromInfo(info).authorizations
+
+    '''
     # Metóda na riešenie referencie
     @classmethod
     async def resolve_reference(cls, info: strawberry.types.Info, id: strawberry.ID):
@@ -26,7 +34,7 @@ class AuthorizationGQLModel(BaseGQLModel):
             result._type_definition = cls._type_definition  # little hack :)
             result.__strawberry_definition__ = cls._type_definition # some version of strawberry changed :(
         return result
-
+    '''
     # Polia modelu
     @strawberry.field(description="""Entity primary key""")
     def id(self, info: strawberry.types.Info) -> strawberry.ID:
@@ -34,19 +42,19 @@ class AuthorizationGQLModel(BaseGQLModel):
 
     @strawberry.field(description="""Proxy users attached to this authorization""")
     async def users(self, info: strawberry.types.Info) -> List["AuthorizationUserGQLModel"]:
-        loader = getLoaders(info).authorizationusers
+        loader = getLoadersFromInfo(info).authorizationusers
         result = await loader.filter_by(authorization_id=self.id)
         return result
 
     @strawberry.field(description="""Proxy groups attached to this authorization""")
     async def groups(self, info: strawberry.types.Info) -> List["AuthorizationGroupGQLModel"]:
-        loader = getLoaders(info).authorizationgroups
+        loader = getLoadersFromInfo(info).authorizationgroups
         result = await loader.filter_by(authorization_id=self.id)
         return result
 
     @strawberry.field(description="""Proxy role types attached to this authorization""")
     async def role_types(self, info: strawberry.types.Info) -> List["AuthorizationRoleTypeGQLModel"]:
-        loader = getLoaders(info).authorizationroletypes
+        loader = getLoadersFromInfo(info).authorizationroletypes
         result = await loader.filter_by(authorization_id=self.id)
         return result
 
@@ -58,8 +66,8 @@ class AuthorizationGQLModel(BaseGQLModel):
 
 @strawberry.field(description="""Finds an authorization entity by received id""")
 async def authorization_by_id(
-    self, info: strawberry.types.Info, id: strawberry.ID
-) -> Union["AuthorizationGQLModel", None]:
+    self, info: strawberry.types.Info, id: uuid.UUID
+) -> typing.Optional[AuthorizationGQLModel]:
     result = await AuthorizationGQLModel.resolve_reference(info, id)
     return result
 
@@ -67,7 +75,7 @@ async def authorization_by_id(
 async def authorization_page(
     self, info: strawberry.types.Info, skip: int = 0, limit: int = 20
 ) -> List["AuthorizationGQLModel"]:
-    loader = getLoaders(info).authorizations
+    loader = getLoadersFromInfo(info).authorizations
     result = await loader.page(skip=skip, limit=limit)
     return result
     
@@ -94,7 +102,7 @@ class AuthorizationResultGQLModel:
 
 @strawberry.mutation(description="""Creates a new authorization""")
 async def authorization_insert(self, info: strawberry.types.Info, authorization: AuthorizationInsertGQLModel) -> AuthorizationResultGQLModel:
-    loader = getLoaders(info).authorizations
+    loader = getLoadersFromInfo(info).authorizations
     row = await loader.insert(authorization)
     result = AuthorizationResultGQLModel()
     result.msg = "ok"

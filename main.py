@@ -1,9 +1,3 @@
-from typing import List
-import time
-import typing
-import logging
-import asyncio
-
 import logging
 
 logging.basicConfig(
@@ -12,35 +6,28 @@ logging.basicConfig(
     datefmt='%Y-%m-%dT%I:%M:%S')
 
 from fastapi import FastAPI, Request
-import strawberry
 from strawberry.fastapi import GraphQLRouter
 from contextlib import asynccontextmanager
 
 ## Definice GraphQL typu (pomoci strawberry https://strawberry.rocks/)
 ## Strawberry zvoleno kvuli moznosti mit federovane GraphQL API (https://strawberry.rocks/docs/guides/federation, https://www.apollographql.com/docs/federation/)
-from gql_workflow.GraphTypeDefinitions import query
 
 ## Definice DB typu (pomoci SQLAlchemy https://www.sqlalchemy.org/)
 ## SQLAlchemy zvoleno kvuli moznost komunikovat s DB asynchronne
 ## https://docs.sqlalchemy.org/en/14/core/future.html?highlight=select#sqlalchemy.future.select
-from gql_workflow.DBDefinitions import startEngine, ComposeConnectionString
-
-from gql_workflow.DBFeeder import initDB
+from DBDefinitions import ComposeConnectionString
 
 ## Zabezpecuje prvotni inicializaci DB a definovani Nahodne struktury pro "Univerzity"
 # from gql_workflow.DBFeeder import createSystemDataStructureRoleTypes, createSystemDataStructureGroupTypes
 
 connectionString = ComposeConnectionString()
 
-from strawberry.asgi import GraphQL
-from gql_workflow.Dataloaders import createLoaders
-
 appcontext = {}
 
 
 @asynccontextmanager
 async def initEngine(app: FastAPI):
-    from gql_workflow.DBDefinitions import startEngine, ComposeConnectionString
+    from DBDefinitions import startEngine, ComposeConnectionString
 
     connectionstring = ComposeConnectionString()
 
@@ -54,14 +41,14 @@ async def initEngine(app: FastAPI):
 
     logging.info("engine started")
 
-    from gql_workflow.DBFeeder import initDB
+    from utils.DBFeeder import initDB
     await initDB(asyncSessionMaker)
 
     logging.info("data (if any) imported")
     yield
 
 
-from gql_workflow.GraphTypeDefinitions import schema
+from GraphTypeDefinitions import schema
 
 app = FastAPI(lifespan=initEngine)
 
@@ -72,7 +59,7 @@ async def get_context():
         async with initEngine(app) as cntx:
             pass
 
-    from gql_workflow.Dataloaders import createLoadersContext
+    from utils.Dataloaders import createLoadersContext
     context = createLoadersContext(appcontext["asyncSessionMaker"])
     return {**context}
 
@@ -100,7 +87,7 @@ def hello(request: Request):
 
 
 from starlette.authentication import (
-    AuthCredentials, AuthenticationBackend, AuthenticationError
+    AuthCredentials, AuthenticationBackend
 )
 from starlette.middleware.authentication import AuthenticationMiddleware
 

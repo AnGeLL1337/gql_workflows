@@ -2,7 +2,6 @@ import datetime
 import strawberry
 from typing import List, Optional, Union, Annotated
 
-import gql_workflow.GraphTypeDefinitions
 
 def getLoaders(info):
     return info.context["all"]
