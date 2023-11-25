@@ -8,6 +8,9 @@ class Mutation:
     from .authorizationGroupGQLModel import authorization_add_group
     authorization_add_group = authorization_add_group
 
+    from .authorizationGroupGQLModel import authorization_update_group
+    authorization_update_group = authorization_update_group
+
     from .authorizationGroupGQLModel import authorization_remove_group
     authorization_remove_group = authorization_remove_group
 

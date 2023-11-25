@@ -1,115 +1,113 @@
 from typing import List
+import time
 import typing
-
+import logging
 import asyncio
 
-from fastapi import FastAPI
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s.%(msecs)03d\t%(levelname)s:\t%(message)s',
+    datefmt='%Y-%m-%dT%I:%M:%S')
+
+from fastapi import FastAPI, Request
 import strawberry
 from strawberry.fastapi import GraphQLRouter
+from contextlib import asynccontextmanager
 
 ## Definice GraphQL typu (pomoci strawberry https://strawberry.rocks/)
 ## Strawberry zvoleno kvuli moznosti mit federovane GraphQL API (https://strawberry.rocks/docs/guides/federation, https://www.apollographql.com/docs/federation/)
-from gql_workflow.GraphTypeDefinitions import Query
+from gql_workflow.GraphTypeDefinitions import query
 
 ## Definice DB typu (pomoci SQLAlchemy https://www.sqlalchemy.org/)
 ## SQLAlchemy zvoleno kvuli moznost komunikovat s DB asynchronne
 ## https://docs.sqlalchemy.org/en/14/core/future.html?highlight=select#sqlalchemy.future.select
 from gql_workflow.DBDefinitions import startEngine, ComposeConnectionString
 
+from gql_workflow.DBFeeder import initDB
+
 ## Zabezpecuje prvotni inicializaci DB a definovani Nahodne struktury pro "Univerzity"
 # from gql_workflow.DBFeeder import createSystemDataStructureRoleTypes, createSystemDataStructureGroupTypes
 
 connectionString = ComposeConnectionString()
 
+from strawberry.asgi import GraphQL
+from gql_workflow.Dataloaders import createLoaders
 
-def singleCall(asyncFunc):
-    """Dekorator, ktery dovoli, aby dekorovana funkce byla volana (vycislena) jen jednou. Navratova hodnota je zapamatovana a pri dalsich volanich vracena.
-    Dekorovana funkce je asynchronni.
-    """
-    resultCache = {}
+appcontext = {}
 
-    async def result():
-        if resultCache.get("result", None) is None:
-            resultCache["result"] = await asyncFunc()
-        return resultCache["result"]
 
-    return result
+@asynccontextmanager
+async def initEngine(app: FastAPI):
+    from gql_workflow.DBDefinitions import startEngine, ComposeConnectionString
 
-from gql_workflow.DBFeeder import initDB
+    connectionstring = ComposeConnectionString()
 
-@singleCall
-async def RunOnceAndReturnSessionMaker():
-    """Provadi inicializaci asynchronniho db engine, inicializaci databaze a vraci asynchronni SessionMaker.
-    Protoze je dekorovana, volani teto funkce se provede jen jednou a vystup se zapamatuje a vraci se pri dalsich volanich.
-    """
-
-    print(f'starting engine for "{connectionString}"')
-    import os
-    makeDrop = os.environ.get("DEMO", "") == "true"
-    result = await startEngine(
-        connectionstring=connectionString, makeDrop=makeDrop, makeUp=True
+    asyncSessionMaker = await startEngine(
+        connectionstring=connectionstring,
+        makeDrop=True,
+        makeUp=True
     )
 
-    print(f"initializing system structures")
+    appcontext["asyncSessionMaker"] = asyncSessionMaker
 
-    ###########################################################################################################################
-    #
-    # zde definujte do funkce asyncio.gather
-    # vlozte asynchronni funkce, ktere maji data uvest do prvotniho konzistentniho stavu
-    await initDB(result)
-    # await asyncio.gather( # concurency running :)
-    # sem lze dat vsechny funkce, ktere maji nejak inicializovat databazi
-    # musi byt asynchronniho typu (async def ...)
-    # createSystemDataStructureRoleTypes(result),
-    # createSystemDataStructureGroupTypes(result)
-    # )
+    logging.info("engine started")
 
-    ###########################################################################################################################
-    print(f"all done")
-    return result
+    from gql_workflow.DBFeeder import initDB
+    await initDB(asyncSessionMaker)
 
-
-from strawberry.asgi import GraphQL
-
-from gql_workflow.Dataloaders import createLoaders
-async def createContext():
-    asyncSessionMaker = await RunOnceAndReturnSessionMaker()
-    loaders = await createLoaders(asyncSessionMaker)
-    return {
-        "asyncSessionMaker": await RunOnceAndReturnSessionMaker(),
-        "all": await createLoaders(asyncSessionMaker),
-        #**loaders,
-    }
-
-
-class MyGraphQL(GraphQL):
-    """Rozsirena trida zabezpecujici praci se session"""
-
-    async def __call__(self, scope, receive, send):
-        # print("another gql call (ug)")
-        # for item in scope['headers']:
-        #    print(item)
-        self._user = "?"
-        result = await GraphQL.__call__(self, scope, receive, send)
-        return result
-
-    async def get_context(self, request, response):
-        parentResult = await GraphQL.get_context(self, request, response)
-        localResult = await createContext()
-        return {**parentResult, **localResult, "user": self._user}
+    logging.info("data (if any) imported")
+    yield
 
 
 from gql_workflow.GraphTypeDefinitions import schema
-## ASGI app, kterou "moutneme"
-graphql_app = MyGraphQL(
-    schema, graphiql=True, allow_queries_via_get=True
+
+app = FastAPI(lifespan=initEngine)
+
+
+async def get_context():
+    asyncSessionMaker = appcontext.get("asyncSessionMaker", None)
+    if asyncSessionMaker is None:
+        async with initEngine(app) as cntx:
+            pass
+
+    from gql_workflow.Dataloaders import createLoadersContext
+    context = createLoadersContext(appcontext["asyncSessionMaker"])
+    return {**context}
+
+
+graphql_app = GraphQLRouter(
+    schema,
+    context_getter=get_context
 )
 
-app = FastAPI()
-app.mount("/gql", graphql_app)
+app.include_router(graphql_app, prefix="/gql")
+
+from doc import attachVoyager
+
+attachVoyager(app, path="/gql/doc")
 
 print("All initialization is done")
 
-# @app.get('/hello')
-# def hello():
-#    return {'hello': 'world'}
+
+@app.get('/hello')
+def hello(request: Request):
+    headers = request.headers
+    auth = request.auth
+    user = request.scope["user"]
+    return {'hello': 'world', 'headers': {**headers}, 'auth': f"{auth}", 'user': user}
+
+
+from starlette.authentication import (
+    AuthCredentials, AuthenticationBackend, AuthenticationError
+)
+from starlette.middleware.authentication import AuthenticationMiddleware
+
+
+class BasicAuthBackend(AuthenticationBackend):
+    async def authenticate(self, conn):
+        return AuthCredentials(["authenticated"]), {"name": "John", "surname": "Newbie"}
+
+
+app.add_middleware(AuthenticationMiddleware, backend=BasicAuthBackend())
