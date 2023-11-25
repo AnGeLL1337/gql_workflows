@@ -1,12 +1,11 @@
 import datetime
 import strawberry
-from typing import List, Optional, Union, Annotated
+from typing import List, Optional, Annotated
 
 from sqlalchemy.util import typing
 from uoishelpers import uuid
 
-import gql_workflow.GraphTypeDefinitions
-from gql_workflow.Dataloaders import getUserFromInfo
+from utils.Dataloaders import getUserFromInfo
 
 
 # Funkcia na získanie DataLoaderov

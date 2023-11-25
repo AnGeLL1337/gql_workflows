@@ -1,8 +1,6 @@
-from functools import cache
-
 from uoishelpers import uuid
 
-from gql_workflow.DBDefinitions import (
+from DBDefinitions import (
     AuthorizationModel,
     AuthorizationGroupModel,
     AuthorizationRoleTypeModel,
@@ -14,7 +12,6 @@ from gql_workflow.DBDefinitions import (
     WorkflowTransitionModel
 )
 
-from sqlalchemy.future import select
 
 def get_demodata():
     def datetime_parser(json_dict):
