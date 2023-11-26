@@ -2,7 +2,7 @@ import datetime
 import uuid
 
 import strawberry
-from typing import Optional, Annotated
+from typing import Optional, Annotated, List
 
 from sqlalchemy.util import typing
 
@@ -43,7 +43,6 @@ class AuthorizationUserGQLModel(BaseGQLModel):
         return getLoadersFromInfo(info).authorizationusers
 
     id = resolve_id
-    authorization_id = resolve_authorization_id
     user_id = resolve_user_id
     accesslevel = resolve_accesslevel
     created = resolve_created
@@ -51,6 +50,16 @@ class AuthorizationUserGQLModel(BaseGQLModel):
     createdby = resolve_createdby
     changedby = resolve_changedby
 
+    @strawberry.field(description="""Proxy users attached to this user""")
+    def users(self) -> Optional["UserGQLModel"]:
+        from .externals import UserGQLModel
+        return UserGQLModel(id=self.user_id)
+
+    @strawberry.field(description="""Authorizations attached to this user""")
+    async def authorizations(self, info: strawberry.types.Info) -> Optional["AuthorizationGQLModel"]:
+        loader = getLoadersFromInfo(info).authorization
+        result = await loader.load(self.authorization_id)
+        return result
 
 #####################################################################
 #

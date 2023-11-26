@@ -38,9 +38,8 @@ async def resolve_user(user_id):
 
 
 @strawberry.field(description="""User ID """)
-# Riešené bez resolve_user lebo toto je len IDčko a nie ForeignKey
-async def resolve_user_id(self) -> uuid.UUID:
-    return self.user_id
+async def resolve_user_id(self) -> typing.Optional["UserGQLModel"]:
+    return await resolve_user(self.user_id)
 
 
 async def resolve_roletype(roletype_id):

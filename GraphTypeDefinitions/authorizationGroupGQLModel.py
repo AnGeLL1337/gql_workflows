@@ -18,7 +18,6 @@ from GraphTypeDefinitions._GraphResolvers import (
     resolve_changedby,
     createRootResolver_by_id,
     createRootResolver_by_page,
-
 )
 from utils.Dataloaders import getLoadersFromInfo, getGroupFromInfo
 
@@ -48,14 +47,25 @@ class AuthorizationGroupGQLModel(BaseGQLModel):
         return getLoadersFromInfo(info).authorizationgroups
 
     id = resolve_id
-    authorization_id = resolve_authorization_id
-    group_id = resolve_group_id
+    # authorization_id = resolve_authorization_id
+    # group_id = resolve_group_id
     accesslevel = resolve_accesslevel
     created = resolve_created
     lastchange = resolve_lastchange
     createdby = resolve_createdby
     changedby = resolve_changedby
-    
+
+    @strawberry.field(description="""Authorizations attached to this group""")
+    async def authorizations(self, info: strawberry.types.Info) -> Optional["AuthorizationGQLModel"]:
+        loader = getLoadersFromInfo(info).authorization
+        result = await loader.load(self.authorization_id)
+        return result
+
+    @strawberry.field(description="""Proxy groups attached to this group""")
+    def groups(self) -> Optional["GroupGQLModel"]:
+        from .externals import GroupGQLModel
+        return GroupGQLModel(id=self.group_id)
+
 
 #####################################################################
 #
