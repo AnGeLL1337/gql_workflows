@@ -8,14 +8,25 @@ from DBDefinitions import (
     AuthorizationGroupModel,
     AuthorizationModel,
     AuthorizationRoleTypeModel,
-    AuthorizationUserModel
+    AuthorizationUserModel,
+    WorkflowModel,
+    WorkflowStateModel,
+    WorkflowTransitionModel,
+    WorkflowStateUserModel,
+    WorkflowStateRoleTypeModel
 )
 
 dbmodels = {
     "authorizations": AuthorizationModel,
     "authorizationgroups": AuthorizationGroupModel,
     "authorizationroletypes": AuthorizationRoleTypeModel,
-    "authorizationusers": AuthorizationUserModel
+    "authorizationusers": AuthorizationUserModel,
+    "workflows": WorkflowModel,
+    "workflowstates": WorkflowStateModel,
+    "workflowtransitions": WorkflowTransitionModel,
+    "workflowstateroles": WorkflowStateRoleTypeModel,
+    "workflowstateusers": WorkflowStateUserModel
+
 }
 
 import aiohttp
@@ -420,6 +431,10 @@ demouser = {
 
 
 def getUserFromInfo(info):
+    # Len pre testovacie účely
+    result = demouser
+    return result
+    '''
     context = info.context
     # print(list(context.keys()))
     result = context.get("user", None)
@@ -433,6 +448,7 @@ def getUserFromInfo(info):
                     context["user"] = result
     logging.debug("getUserFromInfo", result)
     return result
+    '''
 
 
 def createLoadersContext(asyncSessionMaker):

@@ -20,7 +20,7 @@ from GraphTypeDefinitions._GraphResolvers import (
     createRootResolver_by_page,
 
 )
-from utils.Dataloaders import getLoadersFromInfo
+from utils.Dataloaders import getLoadersFromInfo, getUserFromInfo
 
 # Anotace na definici typů
 AuthorizationGQLModel = Annotated["AuthorizationGQLModel", strawberry.lazy(".authorizationGQLModel")]
@@ -84,4 +84,61 @@ authorization_user_page = createRootResolver_by_page(
 # Mutation section
 #
 #####################################################################
+
+
+@strawberry.input(description="Input structure - C operation")
+class AuthorizationUserInsertGQLModel:
+    id: typing.Optional[uuid.UUID] = strawberry.field(description="primary key (UUID), could be client generated",
+                                                      default=None)
+    authorization_id: uuid.UUID = strawberry.field(description="id of authorization")
+    user_id: uuid.UUID = strawberry.field(description="id of user")
+    accesslevel: int = strawberry.field(description="access level")
+    createdby: strawberry.Private[uuid.UUID] = None
+
+
+@strawberry.input(description="Input structure - U operation")
+class AuthorizationUserUpdateGQLModel:
+    lastchange: datetime.datetime = strawberry.field(description="timestamp of last change = TOKEN")
+    id: uuid.UUID = strawberry.field(description="primary key (UUID), identifies object of operation")
+    accesslevel: typing.Optional[int] = strawberry.field(description="access level", default=None)
+    changedby: strawberry.Private[uuid.UUID] = None
+
+
+@strawberry.type(description="Result of CU operation over authorization user")
+class AuthorizationUserResultGQLModel:
+    id: uuid.UUID = strawberry.field(description="primary key of CU operation object")
+    msg: str = strawberry.field(description="""Should be `ok` if descired state has been reached, otherwise `fail`.
+    For update operation fail should be also stated when bad lastchange has been entered.""")
+
+    @strawberry.field(description="subject of operation")
+    async def authorization_user(self, info: strawberry.types.Info) -> AuthorizationUserGQLModel:
+        return await AuthorizationUserGQLModel.resolve_reference(info, self.id)
+
+
+@strawberry.mutation(description="Create a new authorization user")
+async def authorization_user_insert(
+        self, info: strawberry.types.Info, authorization_user: AuthorizationUserInsertGQLModel
+) -> AuthorizationUserResultGQLModel:
+    user = getUserFromInfo(info)
+    authorization_user.createdby = uuid.UUID(user["id"])
+    loader = getLoadersFromInfo(info).authorizationusers
+    row = await loader.insert(authorization_user)
+    result = AuthorizationUserResultGQLModel(id=row.id, msg="ok")
+    result.msg = "ok"
+    result.id = row.id
+    return result
+
+
+@strawberry.mutation(description="Update the authorization user")
+async def authorization_user_update(
+        self, info: strawberry.types.Info, authorization_user: AuthorizationUserUpdateGQLModel
+) -> AuthorizationUserResultGQLModel:
+    user = getUserFromInfo(info)
+    #authorization_user.changedby = uuid.UUID(user["id"])
+    loader = getLoadersFromInfo(info).authorizationusers
+    row = await loader.update(authorization_user)
+    result = AuthorizationUserResultGQLModel(id=row.id, msg="ok")
+    result.msg = "ok"
+    result.id = row.id
+    return result
 
