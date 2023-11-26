@@ -34,7 +34,7 @@ async def initEngine(app: FastAPI):
 
     asyncSessionMaker = await startEngine(
         connectionstring=connectionstring,
-        makeDrop=False, # TODO: Fix error when makeDrop=True
+        makeDrop=True,
         makeUp=True
     )
 
