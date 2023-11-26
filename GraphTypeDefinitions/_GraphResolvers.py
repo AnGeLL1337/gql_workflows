@@ -49,7 +49,7 @@ async def resolve_roletype(roletype_id):
     return result
 
 @strawberry.field(description="""Role Type ID """)
-async def resolve_role_type_id(self) -> typing.Optional["RoleTypeGQLModel"]:
+async def resolve_roletype_id(self) -> typing.Optional["RoleTypeGQLModel"]:
     return await resolve_roletype(self.roletype_id)
 
 

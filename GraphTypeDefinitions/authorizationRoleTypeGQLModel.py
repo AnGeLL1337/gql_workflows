@@ -1,112 +1,152 @@
+import datetime
+import uuid
+
 import strawberry
 from typing import Optional, Annotated
 
+from sqlalchemy.util import typing
 
-# Funkce na získání DataLoaderů
-def getLoaders(info):
-    return info.context["all"]
+from GraphTypeDefinitions.BaseGQLModel import BaseGQLModel
+from GraphTypeDefinitions._GraphResolvers import (
+    resolve_id,
+    resolve_authorization_id,
+    resolve_group_id,
+    resolve_roletype_id,
+    resolve_accesslevel,
+    resolve_created,
+    resolve_lastchange,
+    resolve_createdby,
+    resolve_changedby,
+    createRootResolver_by_id,
+    createRootResolver_by_page,
+)
+from utils.Dataloaders import getLoadersFromInfo, getUserFromInfo
 
 # Anotace na definici typů
 AuthorizationGQLModel = Annotated["AuthorizationGQLModel", strawberry.lazy(".authorizationGQLModel")]
-AuthorizationResultGQLModel = Annotated["AuthorizationResultGQLModel", strawberry.lazy(".authorizationGQLModel")]
-
 RoleTypeGQLModel = Annotated["RoleTypeGQLModel", strawberry.lazy(".externals")]
 GroupGQLModel = Annotated["GroupGQLModel", strawberry.lazy(".externals")]
 
-# Definice GQL modelu AuthorizationRoleTypeGQLModel
-@strawberry.federation.type(
-    keys=["id"], description="""Entity representing an access to information"""
-)
-class AuthorizationRoleTypeGQLModel:
-    @classmethod
-    # Metoda na řešení reference
-    async def resolve_reference(cls, info: strawberry.types.Info, id: strawberry.ID):
-        loader = getLoaders(info).authorizationusers
-        result = await loader.load(id)
-        if result is not None:
-            result._type_definition = cls._type_definition  # little hack :)
-            result.__strawberry_definition__ = cls._type_definition # some version of strawberry changed :(
-        return result
 
-    # Pole modelu
-    @strawberry.field(description="""Entity primary key""")
-    def id(self, info: strawberry.types.Info) -> strawberry.ID:
-        return self.id
-    
-    @strawberry.field(description="""Read, write, or other?""")
-    def accesslevel(self, info: strawberry.types.Info) -> int:
-        return self.accesslevel
-   
-    @strawberry.field(description="""To which authorization this access definition belongs""")
-    async def authorization(self, info: strawberry.types.Info) -> Optional["AuthorizationGQLModel"]:
-        result = await gql_workflow.GraphTypeDefinitions.AuthorizationGQLModel.resolve_reference(info, self.authorization_id)
-        return result
-    
-    @strawberry.field(description="""Role type which user must play in the group to have this access""")
-    async def role_type(self, info: strawberry.types.Info) -> Optional["RoleTypeGQLModel"]:
-        result = gql_workflow.GraphTypeDefinitions.RoleTypeGQLModel(id=self.roletype_id)
-        return result
-    
-    @strawberry.field(description="""Group where the user having appropriate role has this access""")
-    async def group(self, info: strawberry.types.Info) -> Optional["GroupGQLModel"]:
-        result = gql_workflow.GraphTypeDefinitions.GroupGQLModel(id=self.group_id)
-        return result
-    
+@strawberry.input(description="Definition of roletype update")
+class AuthorizationRoleTypeUpdateGQLModel:
+    lastchange: datetime.datetime
+    accesslevel: typing.Optional[int] = None
+
+
+@strawberry.federation.type(
+    keys=["id"],
+    name="AuthorizationRoleTypeGQLModel",
+    description="""Entity representing an access to information"""
+)
+class AuthorizationRoleTypeGQLModel(BaseGQLModel):
+    @classmethod
+    def getLoader(cls, info):
+        return getLoadersFromInfo(info).authorizationroletypes
+
+    id = resolve_id
+    authorization_id = resolve_authorization_id
+    group_id = resolve_group_id
+    roletype_id = resolve_roletype_id
+    accesslevel = resolve_accesslevel
+    created = resolve_created
+    lastchange = resolve_lastchange
+    createdby = resolve_createdby
+    changedby = resolve_changedby
+
+
 #####################################################################
 #
 # Special fields for query
 #
 #####################################################################
 
+from dataclasses import dataclass
+from .utils import createInputs
 
-    
+
+@createInputs
+@dataclass
+class AuthorizationRoleTypeWhereFilter:
+    authorization_id: uuid.UUID = None
+    group_id: uuid.UUID = None
+    roletype_id: uuid.UUID = None
+    accesslevel: int = None
+
+
+authorization_roletype_by_id = createRootResolver_by_id(
+    AuthorizationRoleTypeGQLModel,
+    description="""Returns authorization roletype by ID""")
+
+authorization_roletype_page = createRootResolver_by_page(
+    scalarType=AuthorizationRoleTypeGQLModel,
+    whereFilterType=AuthorizationRoleTypeWhereFilter,
+    description="""Returns authorization roletype by page""",
+    loaderLambda=lambda info: getLoadersFromInfo(info).authorizationroletypes
+)
+
+
 #####################################################################
 #
 # Mutation section
 #
 #####################################################################
 
-@strawberry.input(description="Definition of authorization added to role")
-class AuthorizationAddRoleGQLModel:
-    authorization_id: strawberry.ID # Identifikátor autorizace
-    roletype_id: strawberry.ID # Identifikátor typu role
-    group_id: strawberry.ID # Identifikátor skupiny
-    accesslevel: int # Úroveň přístupu
-
-@strawberry.input(description="Definition of authorization removed from role")
-class AuthorizationRemoveRoleGQLModel:
-    authorization_id: strawberry.ID # Identifikátor autorizace
-    role_type_id: strawberry.ID # Identifikátor typu role
-    group_id: strawberry.ID # Identifikátor skupiny
+@strawberry.input(description="Input structure - C operation")
+class AuthorizationRoleTypeInsertGQLModel:
+    id: Optional[uuid.UUID] = strawberry.field(description="primary key (UUID), could be client generated",
+                                               default=None)
+    authorization_id: uuid.UUID = strawberry.field(description="id of authorization")
+    group_id: uuid.UUID = strawberry.field(description="id of group")
+    roletype_id: uuid.UUID = strawberry.field(description="id of roletype")
+    accesslevel: int = strawberry.field(description="access level")
+    createdby: strawberry.Private[uuid.UUID] = None
 
 
+@strawberry.input(description="Input structure - U operation")
+class AuthorizationRoleTypeUpdateGQLModel:
+    lastchange: datetime.datetime = strawberry.field(description="time of last change = TOKEN")
+    id: uuid.UUID = strawberry.field(description="primary key (UUID), identifies object of operation")
+    accesslevel: typing.Optional[int] = strawberry.field(description="access level", default=None)
+    changedby: strawberry.Private[uuid.UUID] = None
 
-@strawberry.mutation(description="""Adds or updates a roletype at group at the authorization""")
-async def authorization_add_role(self, info: strawberry.types.Info, authorization: AuthorizationAddRoleGQLModel) -> Optional["AuthorizationResultGQLModel"]:
-    loader = getLoaders(info).authorizationroles
-    existing = await loader.filter_by(authorization_id=authorization.authorization_id, group_id=authorization.group_id, roletype_id=authorization.roletype_id)
-    result = gql_workflow.GraphTypeDefinitions.AuthorizationResultGQLModel()
-    result.msg = "ok"
-    row = next(existing, None)
-    if  row is None:
-        row = await loader.insert(authorization)
-        result.id = authorization.authorization_id
-    else:
-        row = await loader.update(row, {"accesslevel": authorization.accesslevel})
-        if row is None:
-            result.id = None
-            result.msg = "fail"
-        result.id = authorization.authorization_id
+
+@strawberry.type(description="Result of CU operation over authorization roletype")
+class AuthorizationRoleTypeResultGQLModel:
+    id: Optional[uuid.UUID] = strawberry.field(description="primary key of CU operation object")
+    msg: str = strawberry.field(description="""Should be `ok` if descired state has been reached, otherwise `fail`.
+    For update operation fail should be also stated when bad lastchange has been entered.""")
+
+    @strawberry.field(description="subject of operation")
+    async def authorization_roletype(self, info: strawberry.types.Info) -> AuthorizationRoleTypeGQLModel:
+        return await AuthorizationRoleTypeGQLModel.resolve_reference(info, self.id)
+
+
+@strawberry.mutation(description="Create a new authorization roletype")
+async def authorization_roletype_insert(
+        self, info: strawberry.types.Info, authorization_roletype: AuthorizationRoleTypeInsertGQLModel
+) -> AuthorizationRoleTypeResultGQLModel:
+    user = getUserFromInfo(info)
+    if user is None:
+        return AuthorizationRoleTypeResultGQLModel(id=None, msg="Fail, no authenticated user")
+    authorization_roletype.createdby = uuid.UUID(user["id"])
+    loader = getLoadersFromInfo(info).authorizationroletypes
+    row = await loader.insert(authorization_roletype)
+    result = AuthorizationRoleTypeResultGQLModel(id=row.id, msg="ok")
     return result
 
-@strawberry.mutation(description="""Remove the group from the authorization""")
-async def authorization_remove_role(self, info: strawberry.types.Info, authorization: AuthorizationAddRoleGQLModel) -> Optional["AuthorizationResultGQLModel"]:
-    loader = getLoaders(info).authorizationroles
-    existing = await loader.filter_by(authorization_id=authorization.authorization_id, group_id=authorization.group_id, roletype_id=authorization.roletype_id)
-    result = gql_workflow.GraphTypeDefinitions.AuthorizationResultGQLModel()
-    if existing is None:
-        result.msg = "fail"
-    else:
-        await loader.delete(existing.id)
-        result.msg = "ok"
+
+@strawberry.mutation(description="Update an existing authorization roletype")
+async def authorization_roletype_update(
+        self, info: strawberry.types.Info, authorization_roletype: AuthorizationRoleTypeUpdateGQLModel
+) -> AuthorizationRoleTypeResultGQLModel:
+    user = getUserFromInfo(info)
+    if user is None:
+        return AuthorizationRoleTypeResultGQLModel(id=None, msg="fail, no authenticated user")
+    authorization_roletype.changedby = uuid.UUID(user["id"])
+    loader = getLoadersFromInfo(info).authorizationroletypes
+    row = await loader.update(authorization_roletype)
+    if row is None:
+        return AuthorizationRoleTypeResultGQLModel(id=authorization_roletype.id, msg="fail, bad lastchange")
+    result = AuthorizationRoleTypeResultGQLModel(id=row.id, msg="ok")
     return result
