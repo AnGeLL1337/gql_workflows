@@ -39,6 +39,13 @@ class Query:
     authorization_user_by_id = authorization_user_by_id
     authorization_user_page = authorization_user_page
 
+    from .authorizationRoleTypeGQLModel import (
+        authorization_roletype_by_id,
+        authorization_roletype_page
+    )
+    authorization_roletype_by_id = authorization_roletype_by_id
+    authorization_roletype_page = authorization_roletype_page
+
 ######################################################################################################################
 #
 #
@@ -56,6 +63,13 @@ class Mutation:
     )
     authorization_user_insert = authorization_user_insert
     authorization_user_update = authorization_user_update
+
+    from .authorizationRoleTypeGQLModel import (
+        authorization_roletype_insert,
+        authorization_roletype_update
+    )
+    authorization_roletype_insert = authorization_roletype_insert
+    authorization_roletype_update = authorization_roletype_update
 
 '''
     from .authorizationUserGQLModel import authorization_add_user

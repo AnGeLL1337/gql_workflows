@@ -430,11 +430,7 @@ demouser = {
 }
 
 
-def getUserFromInfo(info):
-    # Len pre testovacie účely
-    result = demouser
-    return result
-    '''
+def getUserFromInfo(info) -> dict | None:
     context = info.context
     # print(list(context.keys()))
     result = context.get("user", None)
@@ -448,7 +444,6 @@ def getUserFromInfo(info):
                     context["user"] = result
     logging.debug("getUserFromInfo", result)
     return result
-    '''
 
 
 def createLoadersContext(asyncSessionMaker):
