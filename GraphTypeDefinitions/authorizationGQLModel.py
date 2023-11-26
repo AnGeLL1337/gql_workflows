@@ -21,7 +21,9 @@ AuthorizationRoleTypeGQLModel = Annotated["AuthorizationRoleTypeGQLModel", straw
 
 
 @strawberry.federation.type(
-    keys=["id"], description="""Entity representing an access to information"""
+    keys=["id"],
+    name="AuthorizationGQLModel",
+    description="""Entity representing an access to information"""
 )
 class AuthorizationGQLModel(BaseGQLModel):
     @classmethod
@@ -85,7 +87,7 @@ authorization_page = createRootResolver_by_page(
     scalarType=AuthorizationGQLModel,
     whereFilterType=AuthorizationWhereFilter,
     description="Retrieves authorizations paged",
-    loaderLambda=lambda info: getLoadersFromInfo(info).authorizations
+    loaderLambda=lambda info: getLoadersFromInfo(info).authorization
 )
 
 
@@ -98,7 +100,7 @@ authorization_page = createRootResolver_by_page(
 
 @strawberry.input(description="""Definition of authorization added to entity""")
 class AuthorizationInsertGQLModel:
-    id: Optional[strawberry.ID] = None
+    id: uuid.UUID = strawberry.field(description="""primary key (UUID)""")
 
 
 @strawberry.type(description="""Result of authorization operation""")
@@ -113,11 +115,10 @@ class AuthorizationResultGQLModel:
 
 
 @strawberry.mutation(description="""Creates a new authorization""")
-async def authorization_insert(self, info: strawberry.types.Info,
-                               authorization: AuthorizationInsertGQLModel) -> AuthorizationResultGQLModel:
-    loader = getLoadersFromInfo(info).authorizations
+async def authorization_insert(
+        self, info: strawberry.types.Info,authorization: AuthorizationInsertGQLModel
+) -> AuthorizationResultGQLModel:
+    loader = getLoadersFromInfo(info).authorization
     row = await loader.insert(authorization)
-    result = AuthorizationResultGQLModel()
-    result.msg = "ok"
-    result.id = row.id
+    result = AuthorizationResultGQLModel(id=row.id, msg= "ok")
     return result
