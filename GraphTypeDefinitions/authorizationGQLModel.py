@@ -62,7 +62,6 @@ class AuthorizationGQLModel(BaseGQLModel):
         result = await loader.filter_by(authorization_id=self.id)
         return result
 
-
 #####################################################################
 #
 # Special fields for query
@@ -107,7 +106,6 @@ class AuthorizationInsertGQLModel:
 class AuthorizationResultGQLModel:
     id: strawberry.ID = None
     msg: str = None
-
     @strawberry.field(description="""Result of authorization operation""")
     async def authorization(self, info: strawberry.types.Info) -> Union[AuthorizationGQLModel, None]:
         result = await AuthorizationGQLModel.resolve_reference(info, self.id)

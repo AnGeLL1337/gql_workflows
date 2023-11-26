@@ -10,7 +10,6 @@ from GraphTypeDefinitions.BaseGQLModel import BaseGQLModel
 from GraphTypeDefinitions._GraphResolvers import (
     resolve_id,
     resolve_authorization_id,
-    resolve_user_id,
     resolve_group_id,
     resolve_accesslevel,
     resolve_created,
@@ -50,7 +49,6 @@ class AuthorizationGroupGQLModel(BaseGQLModel):
 
     id = resolve_id
     authorization_id = resolve_authorization_id
-    user_id = resolve_user_id
     group_id = resolve_group_id
     accesslevel = resolve_accesslevel
     created = resolve_created
@@ -99,7 +97,6 @@ class AuthorizationGroupInsertGQLModel:
     id: typing.Optional[uuid.UUID] = strawberry.field(description="primary key (UUID), could be client generated",
                                                       default=None)
     authorization_id: uuid.UUID = strawberry.field(description="id of authorization")
-    user_id: uuid.UUID = strawberry.field(description="id of user")
     group_id: uuid.UUID = strawberry.field(description="id of group")
     accesslevel: int = strawberry.field(description="access level")
     createdby: strawberry.Private[uuid.UUID] = None
@@ -146,6 +143,4 @@ async def authorization_group_update(
     loader = getLoadersFromInfo(info).authorizationgroups
     row = await loader.update(authorization_group)
     result = AuthorizationGroupResultGQLModel(id=row.id, msg="ok")
-    result.msg = "ok"
-    result.id = row.id
     return result
