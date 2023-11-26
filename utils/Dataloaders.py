@@ -339,7 +339,7 @@ def createIdLoader(asyncSessionMaker, dbModel):
 
 
 class Loaders:
-    authorizations = None
+    authorization = None
     authorizationgroups = None
     authorizationroletypes = None
     authorizationusers = None
@@ -444,8 +444,7 @@ def getUserFromInfo(info) -> dict | None:
                     context["user"] = result
     logging.debug("getUserFromInfo", result)
     return result
-    '''
-    
+
 def getGroupFromInfo(info):
     # Len pre testovacie účely
     result = demouser
