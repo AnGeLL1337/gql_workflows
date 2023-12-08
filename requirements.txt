@@ -4,6 +4,7 @@ uvicorn[standard]
 gunicorn
 
 asyncpg
+aiohttp
 
 sqlalchemy
 sqlalchemy_utils
@@ -15,3 +16,4 @@ click
 aiodataloader
 
 https://github.com/hrbolek/uoishelpers/archive/refs/heads/main.zip
+

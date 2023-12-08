@@ -1,7 +1,5 @@
 from typing import List, Union
-import typing
 import strawberry as strawberryA
-import uuid
 
 
 def AsyncSessionFromInfo(info):
@@ -366,9 +364,8 @@ class AuthorizationGroupGQLModel:
         result = GroupGQLModel(id=self.group_id)
         return result
 
-from gql_workflow.GraphResolvers import resolveAuthorizationById, resolveWorkflowById
 
-from gql_workflow.DBFeeder import randomWorkflowData
+from utils.DBFeeder import randomWorkflowData
 
 
 @strawberryA.type(description="""Type for query root""")

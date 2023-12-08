@@ -1,15 +1,7 @@
-import sqlalchemy
-import sys
-import asyncio
-
 # setting path
 import pytest
 
 # from ..uoishelpers.uuid import UUIDColumn
-
-from gql_workflow.DBDefinitions import BaseModel
-from gql_workflow.DBDefinitions import AuthorizationModel, AuthorizationGroupModel, AuthorizationUserModel, AuthorizationRoleTypeModel
-from gql_workflow.DBDefinitions import WorkflowModel, WorkflowStateModel, WorkflowStateRoleTypeModel, WorkflowStateUserModel
 
 from tests.shared import prepare_demodata, prepare_in_memory_sqllite, get_demodata
 
@@ -22,7 +14,7 @@ async def test_table_users_feed():
     data = get_demodata()
 
 
-from gql_workflow.DBDefinitions import ComposeConnectionString
+from DBDefinitions import ComposeConnectionString
 
 
 def test_connection_string():
@@ -32,7 +24,7 @@ def test_connection_string():
     assert "@" in connectionString
 
 
-from gql_workflow.DBDefinitions import UUIDColumn
+from DBDefinitions import UUIDColumn
 
 
 def test_connection_uuidcolumn():
@@ -41,7 +33,7 @@ def test_connection_uuidcolumn():
     assert col is not None
 
 
-from gql_workflow.DBDefinitions import startEngine
+from DBDefinitions import startEngine
 
 
 @pytest.mark.asyncio
