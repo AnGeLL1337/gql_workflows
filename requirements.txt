@@ -5,6 +5,7 @@ gunicorn
 
 asyncpg
 aiohttp
+requests
 
 sqlalchemy
 sqlalchemy_utils
@@ -14,6 +15,6 @@ starlette
 strawberry-graphql
 click
 aiodataloader
+pyjwt
 
 https://github.com/hrbolek/uoishelpers/archive/refs/heads/main.zip
-
