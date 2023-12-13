@@ -29,3 +29,5 @@ yarn-error.log*
 
 config.json
 data.json
+
+.idea
