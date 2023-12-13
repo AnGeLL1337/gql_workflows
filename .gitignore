@@ -31,3 +31,6 @@ config.json
 data.json
 
 .idea
+
+# mypy
+mypy.ini
