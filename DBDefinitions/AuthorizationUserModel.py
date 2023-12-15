@@ -1,16 +1,15 @@
 import sqlalchemy
+from sqlalchemy.schema import Column
 from sqlalchemy import (
-    Column,
-    String,
+    Uuid,
     DateTime,
-    Boolean,
     ForeignKey,
     Integer
 )
 from sqlalchemy.orm import relationship
 
 from .uuid import UUIDColumn, UUIDFKey
-from .Base import BaseModel
+from .base import BaseModel
 
 class AuthorizationUserModel(BaseModel):
     """Spravuje pristupove informace zalozene na uzivatelich"""

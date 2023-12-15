@@ -19,13 +19,14 @@ from DBDefinitions import (
     WorkflowStateRoleTypeModel,
 )
 
-from .shared import prepare_demodata, prepare_in_memory_sqllite
+from .shared import prepare_demodata, prepare_in_memory_sqllite, get_demodata
 
 
 @pytest.mark.asyncio
 async def test_load_demo_data():
     async_session_maker = await prepare_in_memory_sqllite()
     await prepare_demodata(async_session_maker)
+    data = get_demodata()
 
 
 def connection_string():

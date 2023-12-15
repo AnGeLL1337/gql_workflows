@@ -10,7 +10,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 from .uuid import UUIDColumn, UUIDFKey
-from .Base import BaseModel
+from .base import BaseModel
 
 class WorkflowModel(BaseModel):
     """Posloupnost stavu a moznosti prechodu mezi nimi (graf)"""

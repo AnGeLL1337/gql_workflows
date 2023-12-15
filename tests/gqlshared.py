@@ -12,10 +12,10 @@ from .shared import (
     prepare_demodata,
     prepare_in_memory_sqllite,
     get_demodata,
-    createContext,
-    CreateSchemaFunction
+    create_context,
+    create_schema_function
 )
-from .client import CreateClientFunction
+from .client import create_client_function
 
 
 def append(
@@ -49,7 +49,10 @@ def append(
         file.write(line)
 
 
-def create_by_id_test(table_name: str, query_endpoint: str, attribute_names: ["id", "name"]) -> callable:
+def create_by_id_test(table_name: str, query_endpoint: str, attribute_names=None) -> callable:
+    if attribute_names is None:
+        attribute_names = ["id", "name"]
+
     @pytest.mark.asyncio
     async def result_test() -> None:
         def test_result(response) -> None:
@@ -66,8 +69,8 @@ def create_by_id_test(table_name: str, query_endpoint: str, attribute_names: ["i
             for attribute in attribute_names:
                 assert response_data[attribute] == f'{data_row[attribute]}'
 
-        schema_executor = CreateSchemaFunction()
-        client_executor = CreateClientFunction()
+        schema_executor = create_schema_function()
+        client_executor = create_client_function()
 
         data = get_demodata()
         data_row = data[table_name][0]
@@ -87,7 +90,8 @@ def create_by_id_test(table_name: str, query_endpoint: str, attribute_names: ["i
     return result_test
 
 
-def create_page_test(table_name: str, query_endpoint: str, attribute_names: ["id", "name"]) -> callable:
+def create_page_test(table_name, query_endpoint, attribute_names=["id", "name"]):
+
     @pytest.mark.asyncio
     async def result_test() -> None:
         def test_result(response) -> None:
@@ -106,8 +110,8 @@ def create_page_test(table_name: str, query_endpoint: str, attribute_names: ["id
                 for attribute in attribute_names:
                     assert row_a[attribute] == f'{row_b[attribute]}'
 
-        schema_executor = CreateSchemaFunction()
-        client_executor = CreateClientFunction()
+        schema_executor = create_schema_function()
+        client_executor = create_client_function()
 
         data = get_demodata()
 
@@ -144,8 +148,8 @@ def create_resolve_reference_test(table_name: str, gqltype: str, attributes_name
 
             assert response_data["id"] == row_id
 
-        schema_executor = CreateSchemaFunction()
-        client_executor = CreateClientFunction()
+        schema_executor = create_schema_function()
+        client_executor = create_client_function()
 
         content = "{" + ", ".join(attributes_names) + "}"
 
@@ -187,7 +191,7 @@ def create_frontend_query(query="{}", variables=None, asserts=None):
         logging.debug("create_frontend_query")
         async_session_maker = await prepare_in_memory_sqllite()
         await prepare_demodata(async_session_maker)
-        context_value = await createContext(async_session_maker)
+        context_value = await create_context(async_session_maker)
         logging.debug(f"query {query} with {variables}")
         print(f"query {query} with {variables}")
 
@@ -238,7 +242,7 @@ def create_update_query(query="{}", variables: dict = None, table_name: str = ""
 
         variables["lastchange"] = lastchange
         variables["id"] = f"{variables['id']}"
-        context_value = createContext(async_session_maker)
+        context_value = create_context(async_session_maker)
         logging.debug(f"query {query} with {variables}")
         print(f"query {query} with {variables}")
 
