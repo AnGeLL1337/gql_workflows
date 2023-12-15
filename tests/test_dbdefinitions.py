@@ -19,7 +19,7 @@ from DBDefinitions import (
     WorkflowStateRoleTypeModel,
 )
 
-from .shared import prepare_demodata, prepare_in_memory_sqllite, get_demodata
+from shared import prepare_demodata, prepare_in_memory_sqllite, get_demodata
 
 
 @pytest.mark.asyncio

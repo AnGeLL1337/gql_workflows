@@ -1,14 +1,14 @@
 import pytest
 
 
-from ..shared import (
+from tests.shared import (
     prepare_demodata,
     prepare_in_memory_sqllite,
     get_demodata,
     create_context,
 )
 
-from ..gqlshared import (
+from tests.gqlshared import (
     create_by_id_test,
     create_page_test,
     create_resolve_reference_test,
@@ -24,10 +24,10 @@ test_query_authorization_users_by_id = create_by_id_test(table_name="awauthoriza
 test_query_authorization_user_page = create_page_test(table_name="awauthorizationusers",
                                                       query_endpoint="authorizationUserPage")
 
-test_authorization_user_insert = create_frontend_query(
-    query="""mutation($authorizationId: UUID!, $userId: UUID!, accesslevel: Int!) {
-        result: authorizationUserInsert(authorizationUser: {authorizationId: $authorizationId, userId: $userId}, 
-        accesslevel: $accesslevel) {
+test_insert_authorization_user = create_frontend_query(
+    query="""mutation($authorizationId: UUID!, $userId: UUID!, $accesslevel: Int!) {
+        result: authorizationUserInsert(authorizationUser: {authorizationId: $authorizationId, userId: $userId, 
+        accesslevel: $accesslevel}) {
             id
             msg
             authorizationUser {
@@ -44,4 +44,23 @@ test_authorization_user_insert = create_frontend_query(
                "userId": "2d9dc5ca-a4a2-11ed-b9df-0242ac120001", "accesslevel": 4}
 )
 
+test_update_authorization_user = create_update_query(
+    query="""mutation($id: UUID!, $lastchange: DateTime!, $accesslevel: Int) {
+        result: authorizationUserUpdate(authorizationUser: {id: $id, lastchange: $lastchange, 
+        accesslevel: $accesslevel}) {
+            id
+            msg
+            authorizationUser {
+                id
+                authorizations{
+                    id
+                }
+                accesslevel
+                lastchange
+            }
+        }
+    }""",
+    variables={"id": "a854adb9-b29a-4062-95b3-cfd685071f16","accesslevel": 6},
+    table_name="awauthorizationusers"
+)
 

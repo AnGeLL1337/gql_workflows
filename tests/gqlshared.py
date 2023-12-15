@@ -8,14 +8,14 @@ import sqlalchemy
 
 from GraphTypeDefinitions import schema
 
-from .shared import (
+from shared import (
     prepare_demodata,
     prepare_in_memory_sqllite,
     get_demodata,
     create_context,
     create_schema_function
 )
-from .client import create_client_function
+from client import create_client_function
 
 
 def append(
@@ -51,7 +51,7 @@ def append(
 
 def create_by_id_test(table_name: str, query_endpoint: str, attribute_names=None) -> callable:
     if attribute_names is None:
-        attribute_names = ["id", "name"]
+        attribute_names = ["id"]
 
     @pytest.mark.asyncio
     async def result_test() -> None:
@@ -90,7 +90,7 @@ def create_by_id_test(table_name: str, query_endpoint: str, attribute_names=None
     return result_test
 
 
-def create_page_test(table_name, query_endpoint, attribute_names=["id", "name"]):
+def create_page_test(table_name, query_endpoint, attribute_names=["id"]):
 
     @pytest.mark.asyncio
     async def result_test() -> None:
@@ -128,7 +128,7 @@ def create_page_test(table_name, query_endpoint, attribute_names=["id", "name"])
     return result_test
 
 
-def create_resolve_reference_test(table_name: str, gqltype: str, attributes_names=["id", "name"]):
+def create_resolve_reference_test(table_name: str, gqltype: str, attributes_names=["id"]):
     @pytest.mark.asyncio
     async def result_test() -> None:
         def test_result(response) -> None:
@@ -180,7 +180,7 @@ def create_resolve_reference_test(table_name: str, gqltype: str, attributes_name
     return result_test
 
 
-def create_frontend_query(query="{}", variables=None, asserts=None):
+def create_frontend_query(query="{}", variables={}, asserts=[]):
     if asserts is None:
         asserts = []
     if variables is None:
@@ -191,7 +191,7 @@ def create_frontend_query(query="{}", variables=None, asserts=None):
         logging.debug("create_frontend_query")
         async_session_maker = await prepare_in_memory_sqllite()
         await prepare_demodata(async_session_maker)
-        context_value = await create_context(async_session_maker)
+        context_value = create_context(async_session_maker)
         logging.debug(f"query {query} with {variables}")
         print(f"query {query} with {variables}")
 
