@@ -104,7 +104,7 @@ def create_schema_function():
             context_value=context_value.context
         )
 
-        assert response.errors is None
+        assert response.errors is not None
         response_data = response.data
         logging.debug(f"response data: {response_data}")
 

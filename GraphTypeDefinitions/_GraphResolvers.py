@@ -6,8 +6,7 @@ import typing
 UserGQLModel = typing.Annotated["UserGQLModel", strawberry.lazy(".externals")]
 GroupGQLModel = typing.Annotated["GroupGQLModel", strawberry.lazy(".externals")]
 RoleTypeGQLModel = typing.Annotated["RoleTypeGQLModel", strawberry.lazy(".externals")]
-RBACObjectGQLModel = typing.Annotated["RBACObjectGQLModel", strawberry.lazy("._RBACObjectGQLModel")]
-# TODO: Neviem čo je RBACObjectGQLModel momentálne
+
 
 
 @strawberry.field(description="""Entity primary key""")
@@ -75,13 +74,6 @@ async def resolve_createdby(self) -> typing.Optional["UserGQLModel"]:
 @strawberry.field(description="""Who made last change""")
 async def resolve_changedby(self) -> typing.Optional["UserGQLModel"]:
     return await resolve_user(self.changedby)
-
-
-@strawberry.field(description="""Who made last change""")
-async def resolve_rbacobject(self) -> typing.Optional[RBACObjectGQLModel]:
-    from ._RBACObjectGQLModel import RBACObjectGQLModel
-    result = None if self.rbacobject is None else await RBACObjectGQLModel.resolve_reference(self.rbacobject_id)
-    return result
 
 
 resolve_result_id: uuid.UUID = strawberry.field(description="primary key of CU operation object")

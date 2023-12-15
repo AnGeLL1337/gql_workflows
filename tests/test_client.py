@@ -1,7 +1,7 @@
 import pytest
 import logging
 
-from .client import create_gql_client
+from tests.client import create_gql_client
 
 
 def test_client_read():
