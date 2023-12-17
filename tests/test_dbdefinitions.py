@@ -1,7 +1,8 @@
+import pytest
 import sqlalchemy
 import sys
 import asyncio
-import pytest
+import os
 
 from DBDefinitions import startEngine
 
@@ -26,10 +27,10 @@ from shared import prepare_demodata, prepare_in_memory_sqllite, get_demodata
 async def test_load_demo_data():
     async_session_maker = await prepare_in_memory_sqllite()
     await prepare_demodata(async_session_maker)
-    data = get_demodata()
+    # data = get_demodata()
 
 
-def connection_string():
+def test_connection_string():
     from DBDefinitions import ComposeConnectionString
     connection_string = ComposeConnectionString()
 

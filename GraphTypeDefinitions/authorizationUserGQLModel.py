@@ -23,6 +23,7 @@ from utils.Dataloaders import getLoadersFromInfo, getUserFromInfo
 
 # Anotace na definici typů
 AuthorizationGQLModel = Annotated["AuthorizationGQLModel", strawberry.lazy(".authorizationGQLModel")]
+AuthorizationUserGQLModel = Annotated["AuthorizationUserGQLModel", strawberry.lazy(".authorizationUserGQLModel")]
 UserGQLModel = Annotated["UserGQLModel", strawberry.lazy(".externals")]
 
 
@@ -43,20 +44,14 @@ class AuthorizationUserGQLModel(BaseGQLModel):
         return getLoadersFromInfo(info).authorizationusers
 
     id = resolve_id
-    user_id = resolve_user_id
     accesslevel = resolve_accesslevel
     created = resolve_created
     lastchange = resolve_lastchange
     createdby = resolve_createdby
     changedby = resolve_changedby
 
-    @strawberry.field(description="""Proxy users attached to this user""")
-    def users(self) -> Optional["UserGQLModel"]:
-        from .externals import UserGQLModel
-        return UserGQLModel(id=self.user_id)
-
-    @strawberry.field(description="""Authorizations attached to this user""")
-    async def authorizations(self, info: strawberry.types.Info) -> Optional["AuthorizationGQLModel"]:
+    @strawberry.field(description="""Authorization attached to this user""")
+    async def authorization(self, info: strawberry.types.Info) -> Optional["AuthorizationGQLModel"]:
         loader = getLoadersFromInfo(info).authorization
         result = await loader.load(self.authorization_id)
         return result
@@ -67,6 +62,13 @@ class AuthorizationUserGQLModel(BaseGQLModel):
 #
 #####################################################################
 
+
+@strawberry.field(description="""Retrieve user by id""")
+async def authorization_user_by_id(
+        self, info: strawberry.types.Info, id: uuid.UUID
+) -> typing.Optional[AuthorizationUserGQLModel]:
+    return await AuthorizationUserGQLModel.resolve_reference(info=info, id=id)
+
 from dataclasses import dataclass
 from .utils import createInputs
 
@@ -74,14 +76,16 @@ from .utils import createInputs
 @createInputs
 @dataclass
 class AuthorizationUserWhereFilter:
-    authorization_id: uuid.UUID = None
-    user_id: uuid.UUID = None
-    accesslevel: int = None
+    authorization_id: uuid.UUID
+    user_id: uuid.UUID
+    accesslevel: int
 
 
+'''
 authorization_user_by_id = createRootResolver_by_id(
     AuthorizationUserGQLModel,
     description="Returns authorization user by id")
+'''
 
 authorization_user_page = createRootResolver_by_page(
     scalarType=AuthorizationUserGQLModel,

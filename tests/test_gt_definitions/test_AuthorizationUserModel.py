@@ -1,4 +1,5 @@
 import pytest
+from GraphTypeDefinitions import schema
 
 
 from tests.shared import (
@@ -32,7 +33,7 @@ test_insert_authorization_user = create_frontend_query(
             msg
             authorizationUser {
                 id
-                authorizations{
+                authorization{
                     id
                 }
                 accesslevel
@@ -41,7 +42,8 @@ test_insert_authorization_user = create_frontend_query(
         }
     }""",
     variables={"authorizationId": "a854adb9-b29a-4062-95b3-cfd685071f16",
-               "userId": "2d9dc5ca-a4a2-11ed-b9df-0242ac120001", "accesslevel": 4}
+               "userId": "2d9dc5ca-a4a2-11ed-b9df-0242ac120001", "accesslevel": 4},
+    asserts=[]
 )
 
 test_update_authorization_user = create_update_query(
@@ -52,7 +54,7 @@ test_update_authorization_user = create_update_query(
             msg
             authorizationUser {
                 id
-                authorizations{
+                authorization{
                     id
                 }
                 accesslevel
@@ -60,7 +62,7 @@ test_update_authorization_user = create_update_query(
             }
         }
     }""",
-    variables={"id": "a854adb9-b29a-4062-95b3-cfd685071f16","accesslevel": 6},
+    variables={"id": "a854adb9-b29a-4062-95b3-cfd685071f16", "accesslevel": 6},
     table_name="awauthorizationusers"
 )
 

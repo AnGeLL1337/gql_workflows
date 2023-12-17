@@ -8,15 +8,12 @@ from .authorizationGroupGQLModel import AuthorizationGroupGQLModel
 from .authorizationRoleTypeGQLModel import AuthorizationRoleTypeGQLModel
 from .authorizationUserGQLModel import AuthorizationUserGQLModel
 
+from .externals import UserGQLModel
+######################################################################################################################
+
 
 @strawberry.type(description="""Root query type""")
 class Query:
-    @strawberry.field(description="""Say hello to the world""")
-    async def say_hello_authorizations(
-            self, info: strawberry.types.Info, id: uuid.UUID
-    ) -> Union[str, None]:
-        result = f"Hello {id}"
-        return result
 
     from .authorizationGQLModel import (
         authorization_by_id,
@@ -124,6 +121,5 @@ class Mutation:
     workflow_state_remove_role = workflow_state_remove_role
 '''
 
-schema = strawberry.federation.Schema(Query, types=[
-    AuthorizationGQLModel, AuthorizationGroupGQLModel, AuthorizationRoleTypeGQLModel, AuthorizationUserGQLModel],
+schema = strawberry.federation.Schema(Query, types=(UserGQLModel, ),
                                       mutation=Mutation)

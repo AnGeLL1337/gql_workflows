@@ -19,16 +19,16 @@ from client import create_client_function
 
 
 def append(
-        query_name: str = "queryname",
-        query: str = None,
-        mutation: str = None,
-        variables: dict = None):
+        query_name="queryname",
+        query=None,
+        mutation=None,
+        variables={}):
     with open("./queries.txt", "a", encoding="utf-8") as file:
         if (query is not None) and ("mutation" in query):
             json_data = {
                 "query": None,
                 "variables": variables,
-                mutation: query
+                "mutation": query
             }
         else:
             json_data = {
@@ -45,17 +45,15 @@ def append(
             query_name = query_name.replace("query", "mutation")
         query_name = query_name + f"_{query.__hash__()}"
         query_name = query_name.replace("-", "")
-        line = f'"{query_name}": {json.dumps(json_data)},\n'
+        line = f'"{query_name}": {json.dumps(json_data)}, \n'
         file.write(line)
 
 
-def create_by_id_test(table_name: str, query_endpoint: str, attribute_names=None) -> callable:
-    if attribute_names is None:
-        attribute_names = ["id"]
+def create_by_id_test(table_name, query_endpoint, attribute_names=["id", "name"]):
 
     @pytest.mark.asyncio
-    async def result_test() -> None:
-        def test_result(response) -> None:
+    async def result_test():
+        def test_result(response):
             print("response", response)
             errors = response.get("errors", None)
             assert errors is None
@@ -75,7 +73,7 @@ def create_by_id_test(table_name: str, query_endpoint: str, attribute_names=None
         data = get_demodata()
         data_row = data[table_name][0]
         content = "{" + ", ".join(attribute_names) + "}"
-        query = "query($id: UUID!){" f"{query_endpoint}(id: $id) {content}" "}"
+        query = "query($id: UUID!){" f"{query_endpoint}(id: $id)" f"{content}" "}"
 
         variable_values = {"id": f'{data_row["id"]}'}
 
@@ -128,15 +126,15 @@ def create_page_test(table_name, query_endpoint, attribute_names=["id"]):
     return result_test
 
 
-def create_resolve_reference_test(table_name: str, gqltype: str, attributes_names=["id"]):
+def create_resolve_reference_test(table_name: str, gqltype: str, attribute_names=["id"]):
     @pytest.mark.asyncio
-    async def result_test() -> None:
-        def test_result(response) -> None:
-            print("response", response)
-            errors = response.get("errors", None)
+    async def result_test():
+        def test_result(resp):
+            print("response", resp)
+            errors = resp.get("errors", None)
             assert errors is None
 
-            response_data = response.get("data", None)
+            response_data = resp.get("data", None)
             assert response_data is not None
 
             logging.info(f"response_data: {response_data}")
@@ -151,28 +149,28 @@ def create_resolve_reference_test(table_name: str, gqltype: str, attributes_name
         schema_executor = create_schema_function()
         client_executor = create_client_function()
 
-        content = "{" + ", ".join(attributes_names) + "}"
+        content = "{" + ", ".join(attribute_names) + "}"
 
         data = get_demodata()
         table = data[table_name]
         for row in table:
             row_id = f"{row['id']}"
 
-            query = ("query($representations: [_Any!]!)" +
-                     "{ " +
-                     "_entities(representations: $representations) {" +
-                     "{ " +
-                     f"... on {gqltype} {content}" +
+            query = ("query($rep: [_Any!]!)" +
+                     "{" +
+                     "_entities(representations: $rep)" +
+                     "{" +
+                     f"    ...on {gqltype} {content}" +
                      "}" +
                      "}"
                      )
 
-            variable_values = {"representations": [{"__typename": f"{gqltype}", "id": f"{row_id}"}]}
+            variable_values = {"rep": [{"__typename": f"{gqltype}", "id": f"{row_id}"}]}
 
             logging.info(f"query representation: {query} with {variable_values}")
-            response = await schema_executor(query, {**variable_values})
-            test_result(response)
             response = await client_executor(query, {**variable_values})
+            test_result(response)
+            response = await schema_executor(query, {**variable_values})
             test_result(response)
 
         append(query_name=f"{gqltype}_representation", query=query)
@@ -181,11 +179,6 @@ def create_resolve_reference_test(table_name: str, gqltype: str, attributes_name
 
 
 def create_frontend_query(query="{}", variables={}, asserts=[]):
-    if asserts is None:
-        asserts = []
-    if variables is None:
-        variables = {}
-
     @pytest.mark.asyncio
     async def test_frontend_query() -> None:
         logging.debug("create_frontend_query")
@@ -202,7 +195,7 @@ def create_frontend_query(query="{}", variables={}, asserts=[]):
             context_value=context_value
         )
 
-        assert response.errors is None
+        assert response.errors is None, response.errors[0]
         response_data = response.data
         logging.debug(f"response_data: {response_data}")
         for a in asserts:
@@ -211,9 +204,7 @@ def create_frontend_query(query="{}", variables={}, asserts=[]):
     return test_frontend_query
 
 
-def create_update_query(query="{}", variables: dict = None, table_name: str = ""):
-    if variables is None:
-        variables = {}
+def create_update_query(query="{}", variables={}, table_name=""):
 
     @pytest.mark.asyncio
     async def test_update() -> None:
@@ -228,7 +219,7 @@ def create_update_query(query="{}", variables: dict = None, table_name: str = ""
         await prepare_demodata(async_session_maker)
 
         print("variables['id']", variables, flush=True)
-        statement = sqlalchemy.text(f"SELECT id, lastchange FROM {table_name} WHERE id = :id").bindparams(id=variables["id"])
+        statement = sqlalchemy.text(f"SELECT id, lastchange FROM {table_name} WHERE id=:id").bindparams(id=variables["id"])
         print("statement", statement, flush=True)
         async with async_session_maker() as session:
             rows = await session.execute(statement)
@@ -241,7 +232,7 @@ def create_update_query(query="{}", variables: dict = None, table_name: str = ""
             print(f"id {id} lastchange {lastchange}")
 
         variables["lastchange"] = lastchange
-        variables["id"] = f"{variables['id']}"
+        variables["id"] = f'{variables["id"]}'
         context_value = create_context(async_session_maker)
         logging.debug(f"query {query} with {variables}")
         print(f"query {query} with {variables}")
@@ -258,7 +249,7 @@ def create_update_query(query="{}", variables: dict = None, table_name: str = ""
         response_data = response.data
         assert response_data is not None
         print(f"response_data: {response_data}")
-        keys = list(variables.keys())
+        keys = list(response_data.keys())
         assert len(keys) == 1, "expected update test has one result"
         key = keys[0]
         result = response_data.get(key, None)

@@ -63,7 +63,7 @@ def resolve_lastchange(self) -> datetime.datetime:
 
 @strawberry.field(description="""Time of entity introduction""")
 def resolve_created(self) -> typing.Optional[datetime.datetime]:
-    return self.lastchange
+    return self.created
 
 
 @strawberry.field(description="""Who created entity""")
@@ -80,19 +80,30 @@ resolve_result_id: uuid.UUID = strawberry.field(description="primary key of CU o
 resolve_result_msg: str = strawberry.field(description="""Should be `ok` if descired state has been reached, otherwise `fail`.
 For update operation fail should be also stated when bad lastchange has been entered.""")
 
+# fields for mutations insert and update
+resolve_insert_id = strawberry.field(graphql_type=typing.Optional[uuid.UUID], description="primary key (UUID), could be client generated", default=None)
+resolve_update_id = strawberry.field(graphql_type=uuid.UUID, description="primary key (UUID), identifies object of operation")
+resolve_update_lastchage = strawberry.field(graphql_type=datetime.datetime, description="timestamp of last change = TOKEN")
+
+# fields for mutation result
+resolve_cu_result_id = strawberry.field(graphql_type=uuid.UUID, description="primary key of CU operation object")
+resolve_cu_result_msg = strawberry.field(graphql_type=str, description="""Should be `ok` if descired state has been reached, otherwise `fail`.
+For update operation fail should be also stated when bad lastchange has been entered.""")
+
+
 
 def createAttributeScalarResolver(
-        scalarType: None = None,
-        foreignKeyName: str = None,
-        description="Retrieves item by its id",
-        permission_classes=()
+    scalarType: None = None,
+    foreignKeyName: str = None,
+    description="Retrieves item by its id",
+    permission_classes=()
 ):
     assert scalarType is not None
     assert foreignKeyName is not None
 
     @strawberry.field(description=description, permission_classes=permission_classes)
     async def foreignkeyScalar(
-            self, info: strawberry.types.Info
+        self, info: strawberry.types.Info
     ) -> typing.Optional[scalarType]:
         # 👇 self must have an attribute, otherwise it is fail of definition
         assert hasattr(self, foreignKeyName)
@@ -105,13 +116,13 @@ def createAttributeScalarResolver(
 
 
 def createAttributeVectorResolver(
-        scalarType: None = None,
-        whereFilterType: None = None,
-        foreignKeyName: str = None,
-        loaderLambda=lambda info: None,
-        description="Retrieves items paged",
-        skip: int = 0,
-        limit: int = 10):
+    scalarType: None = None,
+    whereFilterType: None = None,
+    foreignKeyName: str = None,
+    loaderLambda=lambda info: None,
+    description="Retrieves items paged",
+    skip: int = 0,
+    limit: int = 10):
     assert scalarType is not None
     assert foreignKeyName is not None
 

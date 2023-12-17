@@ -57,8 +57,10 @@ async def prepare_demodata(async_session_maker):
     )
 
 
+from utils.Dataloaders import createLoadersContext
+
 def create_context(async_session_maker, with_user=True):
-    from utils.Dataloaders import createLoadersContext
+
     loaders_context = createLoadersContext(async_session_maker)
     user = {
         "id": "2d9dc5ca-a4a2-11ed-b9df-0242ac120003",
@@ -81,7 +83,7 @@ def create_info(async_session_maker, with_user=True):
     class Info():
         @property
         def context(self):
-            context = create_context(async_session_maker, with_user)
+            context = create_context(async_session_maker, with_user=with_user)
             context["request"] = Request()
             return context
 
@@ -95,13 +97,13 @@ def create_schema_function():
     async def result(query: str, variables: dict = None) -> dict:
         async_session_maker = await prepare_in_memory_sqllite()
         await prepare_demodata(async_session_maker)
-        context_value = create_info(async_session_maker)
+        context_value = create_context(async_session_maker)
         logging.debug(f"query {query} with {variables}")
         print(f"query {query} with {variables}")
         response = await schema.execute(
             query=query,
             variable_values=variables,
-            context_value=context_value.context
+            context_value=context_value
         )
 
         assert response.errors is not None
