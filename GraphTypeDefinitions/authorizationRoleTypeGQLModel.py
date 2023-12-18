@@ -85,10 +85,10 @@ from .utils import createInputs
 @createInputs
 @dataclass
 class AuthorizationRoleTypeWhereFilter:
-    authorization_id: uuid.UUID = None
-    group_id: uuid.UUID = None
-    roletype_id: uuid.UUID = None
-    accesslevel: int = None
+    authorization_id: uuid.UUID
+    group_id: uuid.UUID
+    roletype_id: uuid.UUID
+    accesslevel: int
 
 
 authorization_roletype_by_id = createRootResolver_by_id(

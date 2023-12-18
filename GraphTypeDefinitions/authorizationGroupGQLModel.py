@@ -78,10 +78,10 @@ from .utils import createInputs
 @dataclass
 
 class AuthorizationGroupWhereFilter:
-    authorization_id: typing.Optional[uuid.UUID] = None
-    user_id: typing.Optional[uuid.UUID] = None
-    group_id: typing.Optional[uuid.UUID] = None
-    accesslevel: typing.Optional[int] = None
+    authorization_id: typing.Optional[uuid.UUID]
+    user_id: typing.Optional[uuid.UUID]
+    group_id: typing.Optional[uuid.UUID]
+    accesslevel: typing.Optional[int]
 
 authorization_group_by_id = createRootResolver_by_id(
     AuthorizationGroupGQLModel,
