@@ -38,6 +38,8 @@ from utils.DBFeeder import get_demodata
 async def prepare_demodata(async_session_maker):
     data = get_demodata()
 
+    print(data["awauthorizations"])
+    print(type(data["awauthorizations"][0]["id"]))
     from uoishelpers.feeders import ImportModels
 
     await ImportModels(

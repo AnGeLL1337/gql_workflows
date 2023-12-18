@@ -46,6 +46,9 @@ class AuthorizationRoleTypeGQLModel(BaseGQLModel):
         return getLoadersFromInfo(info).authorizationroletypes
 
     id = resolve_id
+    # group_id = resolve_group_id
+    # roletype_id = resolve_roletype_id
+    # authorization_id = resolve_authorization_id
     accesslevel = resolve_accesslevel
     created = resolve_created
     lastchange = resolve_lastchange
@@ -59,13 +62,12 @@ class AuthorizationRoleTypeGQLModel(BaseGQLModel):
         return result
 
     @strawberry.field(description="""Proxy group attached to this roletype""")
-    async def group(self, info: strawberry.types.Info) -> Optional["AuthorizationGroupGQLModel"]:
-        loader = getLoadersFromInfo(info).authorizationgroups
-        result = await loader.load(self.roletype_id)
-        return result
+    async def group(self) -> Optional["GroupGQLModel"]:
+        from .externals import GroupGQLModel
+        return GroupGQLModel(id=self.group_id)
 
     @strawberry.field(description="""Proxy roletype attached to this roletype""")
-    def roletypes(self) -> Optional["RoleTypeGQLModel"]:
+    def roletype(self) -> Optional["RoleTypeGQLModel"]:
         from .externals import RoleTypeGQLModel
         return RoleTypeGQLModel(id=self.roletype_id)
 

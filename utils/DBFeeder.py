@@ -40,6 +40,7 @@ def get_demodata():
 
     return jsonData
 
+
 async def randomWorkflowData(session):
     workflow = {
         "name": "another workflow",
@@ -139,7 +140,7 @@ import os
 import json
 from uoishelpers.feeders import ImportModels
 import datetime
-
+'''
 def get_demodata():
     def datetime_parser(json_dict):
         for (key, value) in json_dict.items():
@@ -162,6 +163,7 @@ def get_demodata():
         jsonData = json.load(f, object_hook=datetime_parser)
 
     return jsonData
+    '''
 
 async def initDB(asyncSessionMaker):
 
