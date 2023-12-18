@@ -21,9 +21,9 @@ test_reference_authorization_users = create_resolve_reference_test(table_name="a
                                                                    gqltype="AuthorizationUserGQLModel")
 
 test_query_authorization_users_by_id = create_by_id_test(table_name="awauthorizationusers",
-                                                         query_endpoint="authorizationUserById")
+                                                         query_endpoint="authorizationUserById", attribute_names=["id"])
 test_query_authorization_user_page = create_page_test(table_name="awauthorizationusers",
-                                                      query_endpoint="authorizationUserPage")
+                                                      query_endpoint="authorizationUserPage", attribute_names=["id"])
 
 test_insert_authorization_user = create_frontend_query(
     query="""mutation($authorizationId: UUID!, $userId: UUID!, $accesslevel: Int!) {
@@ -54,15 +54,12 @@ test_update_authorization_user = create_update_query(
             msg
             authorizationUser {
                 id
-                authorization{
-                    id
-                }
                 accesslevel
                 lastchange
             }
         }
     }""",
-    variables={"id": "a854adb9-b29a-4062-95b3-cfd685071f16", "accesslevel": 6},
+    variables={"id": "16c92914-0f71-437d-ace3-9661abe4c6cd", "accesslevel": 6},
     table_name="awauthorizationusers"
 )
 

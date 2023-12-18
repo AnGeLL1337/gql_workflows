@@ -87,15 +87,15 @@ def hello(request: Request):
     return {'hello': 'world', 'headers': {**headers}, 'auth': f"{auth}", 'user': user}
 
 
-from starlette.authentication import (
-    AuthCredentials, AuthenticationBackend
-)
-from starlette.middleware.authentication import AuthenticationMiddleware
+# from starlette.authentication import (
+#     AuthCredentials, AuthenticationBackend
+# )
+# from starlette.middleware.authentication import AuthenticationMiddleware
 
 
-class BasicAuthBackend(AuthenticationBackend):
-    async def authenticate(self, conn):
-        return AuthCredentials(["authenticated"]), {"name": "John", "surname": "Newbie"}
+# class BasicAuthBackend(AuthenticationBackend):
+#     async def authenticate(self, conn):
+#         return AuthCredentials(["authenticated"]), {"name": "John", "surname": "Newbie"}
 
 
-app.add_middleware(AuthenticationMiddleware, backend=BasicAuthBackend())
+# app.add_middleware(AuthenticationMiddleware, backend=BasicAuthBackend())

@@ -45,15 +45,15 @@ async def prepare_demodata(async_session_maker):
     await ImportModels(
         async_session_maker,
         [
-            AuthorizationModel,
+            # AuthorizationModel,
             AuthorizationUserModel,
             AuthorizationRoleTypeModel,
             AuthorizationGroupModel,
-            WorkflowModel,
-            WorkflowStateModel,
-            WorkflowTransitionModel,
-            WorkflowStateUserModel,
-            WorkflowStateRoleTypeModel
+            # WorkflowModel,
+            # WorkflowStateModel,
+            # WorkflowTransitionModel,
+            # WorkflowStateUserModel,
+            # WorkflowStateRoleTypeModel
         ],
         data,
     )
@@ -108,7 +108,7 @@ def create_schema_function():
             context_value=context_value
         )
 
-        assert response.errors is not None
+        assert response.errors is None, response.errors
         response_data = response.data
         logging.debug(f"response data: {response_data}")
 

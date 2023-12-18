@@ -1,4 +1,5 @@
-from uoishelpers import uuid
+# from uoishelpers import uuid
+import uuid
 
 from DBDefinitions import (
     AuthorizationModel,
