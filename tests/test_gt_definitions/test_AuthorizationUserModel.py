@@ -33,9 +33,6 @@ test_insert_authorization_user = create_frontend_query(
             msg
             authorizationUser {
                 id
-                authorization{
-                    id
-                }
                 accesslevel
                 lastchange
             }

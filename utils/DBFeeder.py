@@ -1,4 +1,3 @@
-# from uoishelpers import uuid
 import uuid
 
 from DBDefinitions import (

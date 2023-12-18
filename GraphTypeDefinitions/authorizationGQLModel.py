@@ -28,7 +28,7 @@ AuthorizationRoleTypeGQLModel = Annotated["AuthorizationRoleTypeGQLModel", straw
 class AuthorizationGQLModel(BaseGQLModel):
     @classmethod
     def getLoader(cls, info):
-        return getLoadersFromInfo(info).authorizations
+        return getLoadersFromInfo(info).authorization
 
     '''
     # Metóda na riešenie referencie

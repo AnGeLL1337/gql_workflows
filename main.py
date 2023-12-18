@@ -101,7 +101,7 @@ def hello(request: Request):
 
 
 # app.add_middleware(AuthenticationMiddleware, backend=BasicAuthBackend())
-
+'''
 import os
 DEMO = os.getenv("DEMO", None)
 assert DEMO is not None, "DEMO environment variable must be explicitly defined"
@@ -120,3 +120,4 @@ if DEMO:
     logging.info("# RUNNING IN DEMO                                  #")
     logging.info("#                                                  #")
     logging.info("####################################################")
+'''
