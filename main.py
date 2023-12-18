@@ -62,7 +62,9 @@ async def get_context():
 
     from utils.Dataloaders import createLoadersContext
     context = createLoadersContext(appcontext["asyncSessionMaker"])
-    return {**context}
+    result = {**context}
+    result["user"] = {"id": "2d9dc5ca-a4a2-11ed-b9df-0242ac120003"}
+    return result
 
 
 graphql_app = GraphQLRouter(
@@ -99,3 +101,22 @@ def hello(request: Request):
 
 
 # app.add_middleware(AuthenticationMiddleware, backend=BasicAuthBackend())
+
+import os
+DEMO = os.getenv("DEMO", None)
+assert DEMO is not None, "DEMO environment variable must be explicitly defined"
+assert (DEMO == "True") or (DEMO == "False"), "DEMO environment variable can have only `True` or `False` values"
+DEMO = DEMO == "True"
+
+if DEMO:
+    print("####################################################")
+    print("#                                                  #")
+    print("# RUNNING IN DEMO                                  #")
+    print("#                                                  #")
+    print("####################################################")
+
+    logging.info("####################################################")
+    logging.info("#                                                  #")
+    logging.info("# RUNNING IN DEMO                                  #")
+    logging.info("#                                                  #")
+    logging.info("####################################################")

@@ -17,3 +17,15 @@
 ```bash
 pytest --cov-report term-missing --cov=DBDefinitions --cov=GraphTypeDefinitions --cov=utils --log-cli-level=INFO -x
 ```
+
+```bash
+uvicorn main:app --env-file environment.txt --reload
+```
+
+```
+DEMO=True
+DEMOUSER={"id": "2d9dc5ca-a4a2-11ed-b9df-0242ac120003", "name": "John", "surname": "Newbie"}
+JWTPUBLICKEY=http://localhost:8000/oauth/publickey
+JWTRESOLVEUSERPATH=http://localhost:8000/oauth/userinfo
+GQLUG_ENDPOINT_URL=http://localhost:8000/gql
+```

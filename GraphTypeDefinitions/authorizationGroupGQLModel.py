@@ -128,13 +128,17 @@ class AuthorizationGroupResultGQLModel:
     async def authorization_group(self, info: strawberry.types.Info) -> AuthorizationGroupGQLModel:
         return await AuthorizationGroupGQLModel.resolve_reference(info, self.id)
 
+from utils.Dataloaders import getUserFromInfo
 
 @strawberry.mutation(description="Create a new authorization group")
 async def authorization_group_insert(
         self, info: strawberry.types.Info, authorization_group: AuthorizationGroupInsertGQLModel
 ) -> AuthorizationGroupResultGQLModel:
-    group = getGroupFromInfo(info)
-    authorization_group.createdby = uuid.UUID(group["id"])
+    actinguser = getUserFromInfo(info)
+    authorization_group.createdby = uuid.UUID(actinguser["id"])
+    # group = getGroupFromInfo(info)
+    # authorization_group.createdby = uuid.UUID(group["id"])
+
     loader = getLoadersFromInfo(info).authorizationgroups
     row = await loader.insert(authorization_group)
     result = AuthorizationGroupResultGQLModel(id=row.id, msg="ok")
