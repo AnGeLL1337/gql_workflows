@@ -116,6 +116,20 @@ class AuthorizationGroupUpdateGQLModel:
     id: uuid.UUID = strawberry.field(description="primary key (UUID), identifies object of operation")
     accesslevel: typing.Optional[int] = strawberry.field(description="access level", default=None)
     changedby: strawberry.Private[uuid.UUID] = None
+    
+@strawberry.input(description="Input structure - D operation")
+class AuthorizationGroupDeleteGQLModel:
+    id: uuid.UUID
+
+@strawberry.type(description="""Result model for authorization group deletion""")
+class AuthorizationGroupDeleteResultGQLModel:
+    id: uuid.UUID = None
+    msg: str = None
+
+    @strawberry.field(description="""Result of authorization group deletion""")
+    async def user(self, info: strawberry.types.Info) -> AuthorizationGroupGQLModel | None:
+        result = await GroupGQLModel.resolve_reference(info, self.id)
+        return result  
 
 
 @strawberry.type(description="Result of CU operation over authorization group")
@@ -147,7 +161,7 @@ async def authorization_group_insert(
     return result
 
 
-@strawberry.mutation(description="Update the authorization user")
+@strawberry.mutation(description="Update the authorization group")
 async def authorization_group_update(
         self, info: strawberry.types.Info, authorization_group: AuthorizationGroupUpdateGQLModel
 ) -> AuthorizationGroupResultGQLModel:
@@ -155,4 +169,16 @@ async def authorization_group_update(
     loader = getLoadersFromInfo(info).authorizationgroups
     row = await loader.update(authorization_group)
     result = AuthorizationGroupResultGQLModel(id=row.id, msg="ok")
+    return result
+
+@strawberry.mutation(description="Delete the authorization group")
+async def authorization_group_delete(
+        self, info: strawberry.types.Info, authorization_group_id: str
+) -> AuthorizationGroupResultGQLModel:
+    group = getGroupFromInfo(info)
+    loader = getLoadersFromInfo(info).authorizationgroups
+    row = await loader.delete(authorization_group_id)
+    if not row:
+        return AuthorizationGroupResultGQLModel(id=authorization_group_id, msg="fail, group not found")
+    result = AuthorizationGroupResultGQLModel(id=authorization_group_id, msg="ok")
     return result

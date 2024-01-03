@@ -61,24 +61,30 @@ class Mutation:
 
     from .authorizationUserGQLModel import (
         authorization_user_insert,
-        authorization_user_update
+        authorization_user_update,
+        authorization_user_delete
     )
     authorization_user_insert = authorization_user_insert
     authorization_user_update = authorization_user_update
+    authorization_user_delete = authorization_user_delete
 
     from .authorizationRoleTypeGQLModel import (
         authorization_roletype_insert,
-        authorization_roletype_update
+        authorization_roletype_update,
+        authorization_roletype_delete
     )
     authorization_roletype_insert = authorization_roletype_insert
     authorization_roletype_update = authorization_roletype_update
+    authorization_roletype_delete = authorization_roletype_delete
 
     from .authorizationGroupGQLModel import (
         authorization_group_insert,
-        authorization_group_update
+        authorization_group_update,
+        authorization_group_delete
     )
     authorization_group_insert = authorization_group_insert
     authorization_group_update = authorization_group_update
+    authorization_group_delete = authorization_group_delete
 
 '''
     from .authorizationUserGQLModel import authorization_add_user

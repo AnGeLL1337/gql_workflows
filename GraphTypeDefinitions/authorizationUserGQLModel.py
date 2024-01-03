@@ -118,6 +118,20 @@ class AuthorizationUserUpdateGQLModel:
     id: uuid.UUID = strawberry.field(description="primary key (UUID), identifies object of operation")
     accesslevel: typing.Optional[int] = strawberry.field(description="access level", default=None)
     changedby: strawberry.Private[uuid.UUID] = None
+    
+@strawberry.input(description="Input structure - D operation")
+class AuthorizationUserDeleteGQLModel:
+    id: uuid.UUID
+
+@strawberry.type(description="""Result model for authorization user deletion""")
+class AuthorizationUserDeleteResultGQLModel:
+    id: uuid.UUID = None
+    msg: str = None
+
+    @strawberry.field(description="""Result of authorization user deletion""")
+    async def user(self, info: strawberry.types.Info) -> AuthorizationUserGQLModel | None:
+        result = await UserGQLModel.resolve_reference(info, self.id)
+        return result  
 
 
 @strawberry.type(description="Result of CU operation over authorization user")
@@ -158,4 +172,19 @@ async def authorization_user_update(
     if row is None:
         return AuthorizationUserResultGQLModel(id=authorization_user.id, msg="fail, bad lastchange")
     result = AuthorizationUserResultGQLModel(id=row.id, msg="ok")
+    return result
+
+
+@strawberry.mutation(description="Delete the authorization user")
+async def authorization_user_delete(
+        self, info: strawberry.types.Info, authorization_user_id: str
+) -> AuthorizationUserResultGQLModel:
+    user = getUserFromInfo(info)
+    if user is None:
+        return AuthorizationUserResultGQLModel(id=authorization_user_id, msg="fail, no authenticated user")
+    loader = getLoadersFromInfo(info).authorizationusers
+    row = await loader.delete(authorization_user_id)
+    if not row:
+        return AuthorizationUserResultGQLModel(id=authorization_user_id, msg="fail, user not found")
+    result = AuthorizationUserResultGQLModel(id=authorization_user_id, msg="ok")
     return result
