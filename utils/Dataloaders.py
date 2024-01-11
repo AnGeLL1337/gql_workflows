@@ -35,7 +35,7 @@ import os
 from aiodataloader import DataLoader
 from uoishelpers.resolvers import select, update, delete
 
-
+'''
 def prepareSelect(model, where: dict):
     usedTables = [model.__tablename__]
     from sqlalchemy import select, and_, or_
@@ -157,7 +157,7 @@ def prepareSelect(model, where: dict):
     result = baseStatement.filter(filterStatement)
     return result
 
-
+'''
 @cache
 def composeAuthUrl():
     hostname = os.environ.get("AUTHURL", "http://localhost:8088/gql")
@@ -235,7 +235,7 @@ class AuthorizationLoader(DataLoader):
         results = [indexedResult[key] for key in keys]
         return results
 
-
+'''
 def createIdLoader(asyncSessionMaker, dbModel):
     mainstmt = select(dbModel)
     filtermethod = dbModel.id.in_
@@ -337,7 +337,7 @@ def createIdLoader(asyncSessionMaker, dbModel):
 
     return Loader(cache=True)
 
-
+'''
 class Loaders:
     authorization = None
     authorizationgroups = None
