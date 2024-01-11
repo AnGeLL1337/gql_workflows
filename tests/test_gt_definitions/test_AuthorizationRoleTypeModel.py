@@ -1,7 +1,6 @@
 import pytest
 from GraphTypeDefinitions import schema
 
-
 from tests.shared import (
     prepare_demodata,
     prepare_in_memory_sqllite,
@@ -17,13 +16,16 @@ from tests.gqlshared import (
     create_update_query
 )
 
-test_reference_authorization_roletypes = create_resolve_reference_test(table_name="awauthorizationroletypes",
-                                                                   gqltype="AuthorizationRoleTypeGQLModel")
+test_reference_authorization_roletypes = (create_resolve_reference_test(table_name="awauthorizationroletypes", gqltype="AuthorizationRoleTypeGQLModel",
+                                                                       attribute_names=["id", "accesslevel", "created",
+                                                                                        "lastchange"]))
 
 test_query_authorization_roletypes_by_id = create_by_id_test(table_name="awauthorizationroletypes",
-                                                         query_endpoint="authorizationRoletypeById", attribute_names=["id"])
+                                                             query_endpoint="authorizationRoletypeById",
+                                                             attribute_names=["id"])
 test_query_authorization_roletypes_page = create_page_test(table_name="awauthorizationroletypes",
-                                                      query_endpoint="authorizationRoletypePage", attribute_names=["id"])
+                                                           query_endpoint="authorizationRoletypePage",
+                                                           attribute_names=["id"])
 
 test_insert_authorization_roletype = create_frontend_query(
     query="""mutation($authorizationId: UUID!, $groupId: UUID!, $roletypeId: UUID!, $accesslevel: Int!) {
@@ -60,4 +62,3 @@ test_update_authorization_roletype = create_update_query(
     variables={"id": "1125f3ed-cf55-4a57-9eb7-7e8f1447b9b0", "accesslevel": 6},
     table_name="awauthorizationroletypes"
 )
-

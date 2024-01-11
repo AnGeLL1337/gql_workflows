@@ -137,7 +137,7 @@ class AuthorizationRoleTypeDeleteResultGQLModel:
     msg: str = None
 
     @strawberry.field(description="""Result of authorization role type deletion""")
-    async def user(self, info: strawberry.types.Info) -> AuthorizationRoleTypeGQLModel | None:
+    async def roletype(self, info: strawberry.types.Info) -> AuthorizationRoleTypeGQLModel | None:
         result = await RoleTypeGQLModel.resolve_reference(info, self.id)
         return result  
 
@@ -158,8 +158,10 @@ async def authorization_roletype_insert(
         self, info: strawberry.types.Info, authorization_roletype: AuthorizationRoleTypeInsertGQLModel
 ) -> AuthorizationRoleTypeResultGQLModel:
     user = getUserFromInfo(info)
+    '''
     if user is None:
         return AuthorizationRoleTypeResultGQLModel(id=None, msg="Fail, no authenticated user")
+        '''
     authorization_roletype.createdby = uuid.UUID(user["id"])
     loader = getLoadersFromInfo(info).authorizationroletypes
     row = await loader.insert(authorization_roletype)
@@ -172,13 +174,17 @@ async def authorization_roletype_update(
         self, info: strawberry.types.Info, authorization_roletype: AuthorizationRoleTypeUpdateGQLModel
 ) -> AuthorizationRoleTypeResultGQLModel:
     user = getUserFromInfo(info)
+    '''
     if user is None:
         return AuthorizationRoleTypeResultGQLModel(id=None, msg="fail, no authenticated user")
+        '''
     authorization_roletype.changedby = uuid.UUID(user["id"])
     loader = getLoadersFromInfo(info).authorizationroletypes
     row = await loader.update(authorization_roletype)
+    '''
     if row is None:
         return AuthorizationRoleTypeResultGQLModel(id=authorization_roletype.id, msg="fail, bad lastchange")
+        '''
     result = AuthorizationRoleTypeResultGQLModel(id=row.id, msg="ok")
     return result
 

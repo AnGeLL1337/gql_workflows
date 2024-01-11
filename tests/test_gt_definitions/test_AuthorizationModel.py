@@ -31,6 +31,9 @@ test_insert_authorization_group = create_frontend_query(
         result: authorizationInsert(authorization: {id: $id}) {
             id
             msg
+            authorization {
+                id
+            }
         }
     }""",
     variables={"id": "a854adb9-b29a-4062-95b3-cfd685071f00"},
