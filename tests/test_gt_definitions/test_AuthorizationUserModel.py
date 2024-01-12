@@ -36,6 +36,7 @@ test_insert_authorization_user = create_frontend_query(
                 id
                 accesslevel
                 lastchange
+                authorization{id}
             }
         }
     }""",

@@ -33,6 +33,9 @@ test_insert_authorization_group = create_frontend_query(
             msg
             authorization {
                 id
+                users{id}
+                roleTypes{id}
+                groups{id}
             }
         }
     }""",

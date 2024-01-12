@@ -45,19 +45,19 @@ class AuthorizationGQLModel(BaseGQLModel):
     id = resolve_id
 
     @strawberry.field(description="""Proxy users attached to this authorization""")
-    async def user(self, info: strawberry.types.Info) -> List["AuthorizationUserGQLModel"]:
+    async def users(self, info: strawberry.types.Info) -> List["AuthorizationUserGQLModel"]:
         loader = getLoadersFromInfo(info).authorizationusers
         result = await loader.filter_by(authorization_id=self.id)
         return result
 
     @strawberry.field(description="""Proxy groups attached to this authorization""")
-    async def group(self, info: strawberry.types.Info) -> List["AuthorizationGroupGQLModel"]:
+    async def groups(self, info: strawberry.types.Info) -> List["AuthorizationGroupGQLModel"]:
         loader = getLoadersFromInfo(info).authorizationgroups
         result = await loader.filter_by(authorization_id=self.id)
         return result
 
     @strawberry.field(description="""Proxy role types attached to this authorization""")
-    async def role_type(self, info: strawberry.types.Info) -> List["AuthorizationRoleTypeGQLModel"]:
+    async def role_types(self, info: strawberry.types.Info) -> List["AuthorizationRoleTypeGQLModel"]:
         loader = getLoadersFromInfo(info).authorizationroletypes
         result = await loader.filter_by(authorization_id=self.id)
         return result
