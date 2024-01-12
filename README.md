@@ -22,6 +22,10 @@ pytest --cov-report term-missing --cov=DBDefinitions --cov=GraphTypeDefinitions 
 uvicorn main:app --env-file environment.txt --reload
 ```
 
+```bash
+git push origin refs/heads/latest:refs/heads/latest
+```
+
 ```
 DEMO=True
 DEMOUSER={"id": "2d9dc5ca-a4a2-11ed-b9df-0242ac120003", "name": "John", "surname": "Newbie"}
