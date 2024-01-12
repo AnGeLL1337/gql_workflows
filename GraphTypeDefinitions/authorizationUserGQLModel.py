@@ -56,6 +56,7 @@ class AuthorizationUserGQLModel(BaseGQLModel):
         result = await loader.load(self.authorization_id)
         return result
 
+
 #####################################################################
 #
 # Special fields for query
@@ -68,6 +69,7 @@ async def authorization_user_by_id(
         self, info: strawberry.types.Info, id: uuid.UUID
 ) -> typing.Optional[AuthorizationUserGQLModel]:
     return await AuthorizationUserGQLModel.resolve_reference(info=info, id=id)
+
 
 from dataclasses import dataclass
 from .utils import createInputs
@@ -123,7 +125,6 @@ class AuthorizationUserUpdateGQLModel:
 @strawberry.input(description="Input structure - D operation")
 class AuthorizationUserDeleteGQLModel:
     id: uuid.UUID = strawberry.field(description="primary key (UUID), identifies object of operation")
-    # lastchange: datetime.datetime = strawberry.field(description="timestamp of last change = TOKEN")
 
 
 @strawberry.type(description="""Result model for authorization user deletion""")
@@ -163,9 +164,8 @@ async def authorization_user_update(
     authorization_user.changedby = uuid.UUID(user["id"])
     loader = getLoadersFromInfo(info).authorizationusers
     row = await loader.update(authorization_user)
-    if row is None:
-        return AuthorizationUserResultGQLModel(id=authorization_user.id, msg="fail, bad lastchange")
-    result = AuthorizationUserResultGQLModel(id=row.id, msg="ok")
+    result = AuthorizationUserResultGQLModel(id=row.id, msg="ok") if row else (
+        AuthorizationUserResultGQLModel(id=authorization_user.id, msg="fail, bad lastchange"))
     return result
 
 
@@ -176,7 +176,6 @@ async def authorization_user_delete(
     user_id_to_delete = authorization_user_id.id
     loader = getLoadersFromInfo(info).authorizationusers
     row = await loader.delete(user_id_to_delete)
-    if not row:
-        return AuthorizationUserDeleteResultGQLModel(id=user_id_to_delete, msg="fail, user not found")
-    result = AuthorizationUserDeleteResultGQLModel(id=user_id_to_delete, msg="ok")
+    result = AuthorizationUserDeleteResultGQLModel(id=user_id_to_delete, msg="ok") if row else (
+        AuthorizationUserDeleteResultGQLModel(id=user_id_to_delete, msg="fail, user not found"))
     return result
