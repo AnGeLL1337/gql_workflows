@@ -45,7 +45,7 @@ async def prepare_demodata(async_session_maker):
     await ImportModels(
         async_session_maker,
         [
-            # AuthorizationModel,
+            AuthorizationModel,
             AuthorizationUserModel,
             AuthorizationRoleTypeModel,
             AuthorizationGroupModel,

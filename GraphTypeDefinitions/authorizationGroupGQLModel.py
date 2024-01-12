@@ -19,7 +19,7 @@ from GraphTypeDefinitions._GraphResolvers import (
     createRootResolver_by_id,
     createRootResolver_by_page,
 )
-from utils.Dataloaders import getLoadersFromInfo, getGroupFromInfo
+from utils.Dataloaders import getLoadersFromInfo
 
 
 # Annotácie na definíciu typov
@@ -150,8 +150,6 @@ async def authorization_group_insert(
 ) -> AuthorizationGroupResultGQLModel:
     actinguser = getUserFromInfo(info)
     authorization_group.createdby = uuid.UUID(actinguser["id"])
-    # group = getGroupFromInfo(info)
-    # authorization_group.createdby = uuid.UUID(group["id"])
 
     loader = getLoadersFromInfo(info).authorizationgroups
     row = await loader.insert(authorization_group)
@@ -165,7 +163,9 @@ async def authorization_group_insert(
 async def authorization_group_update(
         self, info: strawberry.types.Info, authorization_group: AuthorizationGroupUpdateGQLModel
 ) -> AuthorizationGroupResultGQLModel:
-    group = getGroupFromInfo(info)
+    actinguser = getUserFromInfo(info)
+    authorization_group.changedby = uuid.UUID(actinguser["id"])
+
     loader = getLoadersFromInfo(info).authorizationgroups
     row = await loader.update(authorization_group)
     result = AuthorizationGroupResultGQLModel(id=row.id, msg="ok")
@@ -175,7 +175,6 @@ async def authorization_group_update(
 async def authorization_group_delete(
         self, info: strawberry.types.Info, authorization_group_id: str
 ) -> AuthorizationGroupResultGQLModel:
-    group = getGroupFromInfo(info)
     loader = getLoadersFromInfo(info).authorizationgroups
     row = await loader.delete(authorization_group_id)
     if not row:

@@ -14,7 +14,8 @@ from tests.gqlshared import (
     create_page_test,
     create_resolve_reference_test,
     create_frontend_query,
-    create_update_query
+    create_update_query,
+    create_delete_query
 )
 
 test_reference_authorization_users = create_resolve_reference_test(table_name="awauthorizationusers",
@@ -57,6 +58,18 @@ test_update_authorization_user = create_update_query(
         }
     }""",
     variables={"id": "16c92914-0f71-437d-ace3-9661abe4c6cd", "accesslevel": 6},
+    table_name="awauthorizationusers"
+)
+
+test_delete_authorization_user = create_delete_query(
+    query="""mutation($id: UUID!) {
+        result: authorizationUserDelete(
+        authorizationUserId: {id: $id}) {
+        id
+        msg
+    }
+}""",
+    variables={"id": "16c92914-0f71-437d-ace3-9661abe4c6cd"},
     table_name="awauthorizationusers"
 )
 

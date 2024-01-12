@@ -35,7 +35,7 @@ import os
 from aiodataloader import DataLoader
 from uoishelpers.resolvers import select, update, delete
 
-
+'''
 def prepareSelect(model, where: dict):
     usedTables = [model.__tablename__]
     from sqlalchemy import select, and_, or_
@@ -157,7 +157,7 @@ def prepareSelect(model, where: dict):
     result = baseStatement.filter(filterStatement)
     return result
 
-
+'''
 @cache
 def composeAuthUrl():
     hostname = os.environ.get("AUTHURL", "http://localhost:8088/gql")
@@ -235,7 +235,7 @@ class AuthorizationLoader(DataLoader):
         results = [indexedResult[key] for key in keys]
         return results
 
-
+'''
 def createIdLoader(asyncSessionMaker, dbModel):
     mainstmt = select(dbModel)
     filtermethod = dbModel.id.in_
@@ -337,7 +337,7 @@ def createIdLoader(asyncSessionMaker, dbModel):
 
     return Loader(cache=True)
 
-
+'''
 class Loaders:
     authorization = None
     authorizationgroups = None
@@ -430,7 +430,7 @@ demouser = {
 }
 
 
-def getUserFromInfo(info) -> dict | None:
+def getUserFromInfo(info):
     context = info.context
     # print(list(context.keys()))
     result = context.get("user", None)
@@ -444,26 +444,6 @@ def getUserFromInfo(info) -> dict | None:
                     context["user"] = result
     logging.debug("getUserFromInfo", result)
     return result
-
-def getGroupFromInfo(info):
-    # Len pre testovacie účely
-    result = demouser
-    return result
-    '''
-    context = info.context
-    # print(list(context.keys()))
-    result = context.get("user", None)
-    if result is None:
-        authorization = context["request"].headers.get("Authorization", None)
-        if authorization is not None:
-            if 'Bearer ' in authorization:
-                token = authorization.split(' ')[1]
-                if token == "2d9dc5ca-a4a2-11ed-b9df-0242ac120003":
-                    result = demouser
-                    context["user"] = result
-    logging.debug("getUserFromInfo", result)
-    return result
-    '''
 
 
 def createLoadersContext(asyncSessionMaker):
