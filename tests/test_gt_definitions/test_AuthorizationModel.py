@@ -16,13 +16,13 @@ from tests.gqlshared import (
     create_frontend_query,
     create_update_query
 )
-'''
+
 test_reference_authorization = create_resolve_reference_test(table_name="awauthorizations",
                                                              gqltype="AuthorizationGQLModel")
 
 test_query_authorizations_by_id = create_by_id_test(table_name="awauthorizations", query_endpoint="authorizationById",
                                                     attribute_names=["id"])
-'''
+
 test_query_authorization_page = create_page_test(table_name="awauthorizations", query_endpoint="authorizationPage",
                                                  attribute_names=["id"])
 
