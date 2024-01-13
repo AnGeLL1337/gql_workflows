@@ -177,11 +177,8 @@ async def authorization_roletype_update(
     authorization_roletype.changedby = uuid.UUID(user["id"])
     loader = getLoadersFromInfo(info).authorizationroletypes
     row = await loader.update(authorization_roletype)
-    '''
-    if row is None:
-        return AuthorizationRoleTypeResultGQLModel(id=authorization_roletype.id, msg="fail, bad lastchange")
-        '''
-    result = AuthorizationRoleTypeResultGQLModel(id=row.id, msg="ok")
+    result = AuthorizationRoleTypeResultGQLModel(id=row.id, msg="ok") if row else (
+        AuthorizationRoleTypeResultGQLModel(id=authorization_roletype.id, msg="fail, bad lastchange"))
     return result
 
 @strawberry.mutation(description="Delete an existing authorization roletype")

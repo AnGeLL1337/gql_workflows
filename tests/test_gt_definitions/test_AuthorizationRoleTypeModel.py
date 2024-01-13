@@ -13,7 +13,8 @@ from tests.gqlshared import (
     create_page_test,
     create_resolve_reference_test,
     create_frontend_query,
-    create_update_query
+    create_update_query,
+    create_delete_query
 )
 
 test_reference_authorization_roletypes = (create_resolve_reference_test(table_name="awauthorizationroletypes", gqltype="AuthorizationRoleTypeGQLModel",
@@ -37,6 +38,9 @@ test_insert_authorization_roletype = create_frontend_query(
                 id
                 accesslevel
                 lastchange
+                authorization{id}
+                group{id}
+                roletype{id}
             }
         }
     }""",
@@ -60,5 +64,17 @@ test_update_authorization_roletype = create_update_query(
         }
     }""",
     variables={"id": "1125f3ed-cf55-4a57-9eb7-7e8f1447b9b0", "accesslevel": 6},
+    table_name="awauthorizationroletypes"
+)
+
+test_delete_authorization_role_type = create_delete_query(
+    query="""mutation($id: UUID!) {
+        result: authorizationRoletypeDelete(
+        authorizationRoletypeId: {id: $id}) {
+        id
+        msg
+    }
+}""",
+    variables={"id": "1125f3ed-cf55-4a57-9eb7-7e8f1447b9b0"},
     table_name="awauthorizationroletypes"
 )
