@@ -129,17 +129,13 @@ class AuthorizationRoleTypeUpdateGQLModel:
 
 @strawberry.input(description="Input structure - D operation")
 class AuthorizationRoleTypeDeleteGQLModel:
-    id: uuid.UUID
+    id: uuid.UUID = strawberry.field(description="primary key (UUID), identifies object of operation")
+
 
 @strawberry.type(description="""Result model for authorization role type deletion""")
 class AuthorizationRoleTypeDeleteResultGQLModel:
-    id: uuid.UUID = None
-    msg: str = None
-
-    @strawberry.field(description="""Result of authorization role type deletion""")
-    async def roletype(self, info: strawberry.types.Info) -> AuthorizationRoleTypeGQLModel | None:
-        result = await RoleTypeGQLModel.resolve_reference(info, self.id)
-        return result  
+    id: Optional[uuid.UUID] = strawberry.field(description="ID of deleted object if msg is ok")
+    msg: str = strawberry.field(description="""Should be `ok` if descired state has been reached, otherwise `fail`.""")
 
 
 @strawberry.type(description="Result of CU operation over authorization roletype")
@@ -181,23 +177,17 @@ async def authorization_roletype_update(
     authorization_roletype.changedby = uuid.UUID(user["id"])
     loader = getLoadersFromInfo(info).authorizationroletypes
     row = await loader.update(authorization_roletype)
-    '''
-    if row is None:
-        return AuthorizationRoleTypeResultGQLModel(id=authorization_roletype.id, msg="fail, bad lastchange")
-        '''
-    result = AuthorizationRoleTypeResultGQLModel(id=row.id, msg="ok")
+    result = AuthorizationRoleTypeResultGQLModel(id=row.id, msg="ok") if row else (
+        AuthorizationRoleTypeResultGQLModel(id=authorization_roletype.id, msg="fail, bad lastchange"))
     return result
 
 @strawberry.mutation(description="Delete an existing authorization roletype")
 async def authorization_roletype_delete(
-        self, info: strawberry.types.Info, authorization_roletype_id: str
-) -> AuthorizationRoleTypeResultGQLModel:
-    user = getUserFromInfo(info)
-    if user is None:
-        return AuthorizationRoleTypeResultGQLModel(id=None, msg="fail, no authenticated user")
+        self, info: strawberry.types.Info, authorization_roletype_id: AuthorizationRoleTypeDeleteGQLModel
+) -> AuthorizationRoleTypeDeleteResultGQLModel:
+    roletype_id_to_delete = authorization_roletype_id.id
     loader = getLoadersFromInfo(info).authorizationroletypes
-    row = await loader.delete(authorization_roletype_id)
-    if not row:
-        return AuthorizationRoleTypeResultGQLModel(id=authorization_roletype_id, msg="fail, roletype not found")
-    result = AuthorizationRoleTypeResultGQLModel(id=authorization_roletype_id, msg="ok")
+    row = await loader.delete(roletype_id_to_delete)
+    result = AuthorizationRoleTypeDeleteResultGQLModel(id=roletype_id_to_delete, msg="ok") if row else (
+        AuthorizationRoleTypeDeleteResultGQLModel(id=roletype_id_to_delete, msg="fail, role type not found"))
     return result

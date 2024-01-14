@@ -19,7 +19,7 @@ from GraphTypeDefinitions._GraphResolvers import (
     createRootResolver_by_id,
     createRootResolver_by_page,
 )
-from utils.Dataloaders import getLoadersFromInfo, getGroupFromInfo
+from utils.Dataloaders import getLoadersFromInfo
 
 
 # Annotácie na definíciu typov
@@ -119,17 +119,13 @@ class AuthorizationGroupUpdateGQLModel:
     
 @strawberry.input(description="Input structure - D operation")
 class AuthorizationGroupDeleteGQLModel:
-    id: uuid.UUID
+    id: uuid.UUID = strawberry.field(description="primary key (UUID), identifies object of operation")
+
 
 @strawberry.type(description="""Result model for authorization group deletion""")
 class AuthorizationGroupDeleteResultGQLModel:
-    id: uuid.UUID = None
-    msg: str = None
-
-    @strawberry.field(description="""Result of authorization group deletion""")
-    async def user(self, info: strawberry.types.Info) -> AuthorizationGroupGQLModel | None:
-        result = await GroupGQLModel.resolve_reference(info, self.id)
-        return result  
+    id: Optional[uuid.UUID] = strawberry.field(description="ID of deleted object if msg is ok")
+    msg: str = strawberry.field(description="""Should be `ok` if descired state has been reached, otherwise `fail`.""")
 
 
 @strawberry.type(description="Result of CU operation over authorization group")
@@ -150,8 +146,6 @@ async def authorization_group_insert(
 ) -> AuthorizationGroupResultGQLModel:
     actinguser = getUserFromInfo(info)
     authorization_group.createdby = uuid.UUID(actinguser["id"])
-    # group = getGroupFromInfo(info)
-    # authorization_group.createdby = uuid.UUID(group["id"])
 
     loader = getLoadersFromInfo(info).authorizationgroups
     row = await loader.insert(authorization_group)
@@ -165,7 +159,8 @@ async def authorization_group_insert(
 async def authorization_group_update(
         self, info: strawberry.types.Info, authorization_group: AuthorizationGroupUpdateGQLModel
 ) -> AuthorizationGroupResultGQLModel:
-    group = getGroupFromInfo(info)
+    actinguser = getUserFromInfo(info)
+    authorization_group.changedby = uuid.UUID(actinguser["id"])
     loader = getLoadersFromInfo(info).authorizationgroups
     row = await loader.update(authorization_group)
     result = AuthorizationGroupResultGQLModel(id=row.id, msg="ok")
@@ -173,12 +168,11 @@ async def authorization_group_update(
 
 @strawberry.mutation(description="Delete the authorization group")
 async def authorization_group_delete(
-        self, info: strawberry.types.Info, authorization_group_id: str
-) -> AuthorizationGroupResultGQLModel:
-    group = getGroupFromInfo(info)
+        self, info: strawberry.types.Info, authorization_group_id: AuthorizationGroupDeleteGQLModel
+) -> AuthorizationGroupDeleteResultGQLModel:
+    group_id_to_delete = authorization_group_id.id
     loader = getLoadersFromInfo(info).authorizationgroups
-    row = await loader.delete(authorization_group_id)
-    if not row:
-        return AuthorizationGroupResultGQLModel(id=authorization_group_id, msg="fail, group not found")
-    result = AuthorizationGroupResultGQLModel(id=authorization_group_id, msg="ok")
+    row = await loader.delete(group_id_to_delete)
+    result = AuthorizationGroupDeleteResultGQLModel(id=group_id_to_delete, msg="ok") if row else (
+        AuthorizationGroupDeleteResultGQLModel(id=group_id_to_delete, msg="fail, group not found"))
     return result

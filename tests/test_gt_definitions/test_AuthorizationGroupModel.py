@@ -14,7 +14,8 @@ from tests.gqlshared import (
     create_page_test,
     create_resolve_reference_test,
     create_frontend_query,
-    create_update_query
+    create_update_query,
+    create_delete_query
 )
 
 test_reference_authorization_groups = create_resolve_reference_test(table_name="awauthorizationgroups",
@@ -35,6 +36,8 @@ test_insert_authorization_group = create_frontend_query(
                 id
                 accesslevel
                 lastchange
+                authorization{id}
+                group{id}
             }
         }
     }""",
@@ -60,3 +63,14 @@ test_update_authorization_group = create_update_query(
     table_name="awauthorizationgroups"
 )
 
+test_delete_authorization_group = create_delete_query(
+    query="""mutation($id: UUID!) {
+        result: authorizationGroupDelete(
+        authorizationGroupId: {id: $id}) {
+        id
+        msg
+    }
+}""",
+    variables={"id": "4390a9cc-4751-482c-932b-908f0354380e"},
+    table_name="awauthorizationgroups"
+)
