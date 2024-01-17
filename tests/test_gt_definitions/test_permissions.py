@@ -6,7 +6,7 @@ def uuidstr():
     return f"{uuid.uuid1()}"
 
 
-from utils import createFrontendQuery
+from gt_utils import createFrontendQuery
 _test_request_permitted = createFrontendQuery(
     query="""query ($id: UUID!) {
         requestById(id: $id) {
