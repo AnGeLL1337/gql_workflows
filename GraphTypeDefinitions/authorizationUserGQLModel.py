@@ -7,6 +7,8 @@ from typing import Optional, Annotated, List
 from sqlalchemy.util import typing
 
 from GraphTypeDefinitions.BaseGQLModel import BaseGQLModel
+from ._GraphPermissions import RoleBasedPermission, OnlyForAuthentized
+
 from GraphTypeDefinitions._GraphResolvers import (
     resolve_id,
     resolve_authorization_id,
@@ -50,7 +52,7 @@ class AuthorizationUserGQLModel(BaseGQLModel):
     createdby = resolve_createdby
     changedby = resolve_changedby
 
-    @strawberry.field(description="""Authorization attached to this user""")
+    @strawberry.field(description="""Authorization attached to this user""", permission_classes=[OnlyForAuthentized()])
     async def authorization(self, info: strawberry.types.Info) -> Optional["AuthorizationGQLModel"]:
         loader = getLoadersFromInfo(info).authorization
         result = await loader.load(self.authorization_id)
@@ -64,7 +66,7 @@ class AuthorizationUserGQLModel(BaseGQLModel):
 #####################################################################
 
 
-@strawberry.field(description="""Retrieve user by id""")
+@strawberry.field(description="""Retrieve user by id""", permission_classes=[OnlyForAuthentized()])
 async def authorization_user_by_id(
         self, info: strawberry.types.Info, id: uuid.UUID
 ) -> typing.Optional[AuthorizationUserGQLModel]:
@@ -144,7 +146,7 @@ class AuthorizationUserResultGQLModel:
         return await AuthorizationUserGQLModel.resolve_reference(info, self.id)
 
 
-@strawberry.mutation(description="Create a new authorization user")
+@strawberry.mutation(description="Create a new authorization user", permission_classes=[OnlyForAuthentized()])
 async def authorization_user_insert(
         self, info: strawberry.types.Info, authorization_user: AuthorizationUserInsertGQLModel
 ) -> AuthorizationUserResultGQLModel:
@@ -156,7 +158,7 @@ async def authorization_user_insert(
     return result
 
 
-@strawberry.mutation(description="Update the authorization user")
+@strawberry.mutation(description="Update the authorization user", permission_classes=[OnlyForAuthentized()])
 async def authorization_user_update(
         self, info: strawberry.types.Info, authorization_user: AuthorizationUserUpdateGQLModel
 ) -> AuthorizationUserResultGQLModel:
@@ -169,7 +171,7 @@ async def authorization_user_update(
     return result
 
 
-@strawberry.mutation(description="Delete the authorization user")
+@strawberry.mutation(description="Delete the authorization user", permission_classes=[OnlyForAuthentized()])
 async def authorization_user_delete(
         self, info: strawberry.types.Info, authorization_user_id: AuthorizationUserDeleteGQLModel
 ) -> AuthorizationUserDeleteResultGQLModel:

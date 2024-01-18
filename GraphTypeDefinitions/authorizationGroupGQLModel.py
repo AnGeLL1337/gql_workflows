@@ -7,6 +7,8 @@ from typing import List, Optional, Annotated
 from sqlalchemy.util import typing
 
 from GraphTypeDefinitions.BaseGQLModel import BaseGQLModel
+from ._GraphPermissions import RoleBasedPermission, OnlyForAuthentized
+
 from GraphTypeDefinitions._GraphResolvers import (
     resolve_id,
     resolve_authorization_id,
@@ -53,13 +55,13 @@ class AuthorizationGroupGQLModel(BaseGQLModel):
     createdby = resolve_createdby
     changedby = resolve_changedby
 
-    @strawberry.field(description="""Authorizations attached to this group""")
+    @strawberry.field(description="""Authorizations attached to this group""", permission_classes=[OnlyForAuthentized()])
     async def authorization(self, info: strawberry.types.Info) -> Optional["AuthorizationGQLModel"]:
         loader = getLoadersFromInfo(info).authorization
         result = await loader.load(self.authorization_id)
         return result
 
-    @strawberry.field(description="""Proxy groups attached to this group""")
+    @strawberry.field(description="""Proxy groups attached to this group""", permission_classes=[OnlyForAuthentized()])
     def group(self) -> Optional["GroupGQLModel"]:
         from .externals import GroupGQLModel
         return GroupGQLModel(id=self.group_id)
@@ -140,7 +142,7 @@ class AuthorizationGroupResultGQLModel:
 
 from utils.Dataloaders import getUserFromInfo
 
-@strawberry.mutation(description="Create a new authorization group")
+@strawberry.mutation(description="Create a new authorization group", permission_classes=[OnlyForAuthentized()])
 async def authorization_group_insert(
         self, info: strawberry.types.Info, authorization_group: AuthorizationGroupInsertGQLModel
 ) -> AuthorizationGroupResultGQLModel:
@@ -155,7 +157,7 @@ async def authorization_group_insert(
     return result
 
 
-@strawberry.mutation(description="Update the authorization group")
+@strawberry.mutation(description="Update the authorization group", permission_classes=[OnlyForAuthentized()])
 async def authorization_group_update(
         self, info: strawberry.types.Info, authorization_group: AuthorizationGroupUpdateGQLModel
 ) -> AuthorizationGroupResultGQLModel:
@@ -166,7 +168,7 @@ async def authorization_group_update(
     result = AuthorizationGroupResultGQLModel(id=row.id, msg="ok")
     return result
 
-@strawberry.mutation(description="Delete the authorization group")
+@strawberry.mutation(description="Delete the authorization group", permission_classes=[OnlyForAuthentized()])
 async def authorization_group_delete(
         self, info: strawberry.types.Info, authorization_group_id: AuthorizationGroupDeleteGQLModel
 ) -> AuthorizationGroupDeleteResultGQLModel:

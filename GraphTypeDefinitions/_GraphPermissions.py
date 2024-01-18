@@ -278,7 +278,8 @@ from utils.Dataloaders import getLoadersFromInfo
 # async def resolveRoles(info, id):
 #     return []
 
-from utils.Dataloaders import getUgConnection, getLoadersFromInfo
+#from utils.Dataloaders import getUgConnection, getLoadersFromInfo   // --> getUgConnection házelo error
+from utils.Dataloaders import getLoadersFromInfo
 from utils.Dataloaders import getUserFromInfo
 
 
