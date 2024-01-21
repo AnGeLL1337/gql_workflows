@@ -3,14 +3,12 @@ from sqlalchemy import (
     Column,
     String,
     DateTime,
-    Boolean,
-    ForeignKey,
-    Integer
+    ForeignKey
 )
-from sqlalchemy.orm import relationship
 
 from .uuid import UUIDColumn, UUIDFKey
 from .base import BaseModel
+
 
 class WorkflowModel(BaseModel):
     """Posloupnost stavu a moznosti prechodu mezi nimi (graf)"""
@@ -22,11 +20,13 @@ class WorkflowModel(BaseModel):
     name_en = Column(String)
 
     authorization_id = Column(ForeignKey("awauthorizations.id"), index=True)
-    #authorization = relationship("AuthorizationModel", back_populates="workflow")
+    # authorization = relationship("AuthorizationModel", back_populates="workflow")
 
-    #states = relationship("WorkflowStateModel", back_populates="workflow")
+    # states = relationship("WorkflowStateModel", back_populates="workflow")
 
     created = Column(DateTime, server_default=sqlalchemy.sql.func.now())
     lastchange = Column(DateTime, server_default=sqlalchemy.sql.func.now())
-    changedby = UUIDFKey(nullable=True)#Column(ForeignKey("users.id"), index=True, nullable=True)
-    createdby = UUIDFKey(nullable=True)#Column(ForeignKey("users.id"), index=True, nullable=True)
+    changedby = UUIDFKey(nullable=True)
+    # Column(ForeignKey("users.id"), index=True, nullable=True)
+    createdby = UUIDFKey(nullable=True)
+    # Column(ForeignKey("users.id"), index=True, nullable=True)

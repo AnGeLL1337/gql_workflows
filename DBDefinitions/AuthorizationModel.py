@@ -1,15 +1,4 @@
-import sqlalchemy
-from sqlalchemy import (
-    Column,
-    String,
-    DateTime,
-    Boolean,
-    ForeignKey,
-    Integer
-)
-from sqlalchemy.orm import relationship
-
-from .uuid import UUIDColumn, UUIDFKey
+from .uuid import UUIDColumn
 from .base import BaseModel
 
 

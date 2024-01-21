@@ -20,7 +20,7 @@ class AuthorizationGroupModel(BaseModel):
     id = UUIDColumn()
 
     authorization_id = Column(ForeignKey("awauthorizations.id"), index=True, comment="Identifikátor autorizácie (foreign key) a indexovaný stĺpec")
-    #authorization = relationship("AuthorizationModel", back_populates="groupaccesses")
+    # authorization = relationship("AuthorizationModel", back_populates="groupaccesses")
 
     group_id = UUIDFKey(nullable=True, comment="Identifikátor skupiny (foreign key) s možnosťou null hodnoty")#Column(ForeignKey("groups.id"), index=True)
 

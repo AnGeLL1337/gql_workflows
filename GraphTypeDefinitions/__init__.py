@@ -51,6 +51,7 @@ class Query:
 #
 ######################################################################################################################
 
+
 @strawberry.type(description="""Root mutation type""")
 class Mutation:
 
@@ -85,6 +86,7 @@ class Mutation:
     authorization_group_insert = authorization_group_insert
     authorization_group_update = authorization_group_update
     authorization_group_delete = authorization_group_delete
+
 
 '''
     from .authorizationUserGQLModel import authorization_add_user

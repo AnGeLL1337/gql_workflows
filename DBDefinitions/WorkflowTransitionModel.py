@@ -4,13 +4,12 @@ from sqlalchemy import (
     String,
     DateTime,
     Boolean,
-    ForeignKey,
-    Integer
+    ForeignKey
 )
-from sqlalchemy.orm import relationship
 
 from .uuid import UUIDColumn, UUIDFKey
 from .base import BaseModel
+
 
 class WorkflowTransitionModel(BaseModel):
     """zmena stav - prechod (hrana)"""
@@ -28,5 +27,7 @@ class WorkflowTransitionModel(BaseModel):
 
     created = Column(DateTime, server_default=sqlalchemy.sql.func.now())
     lastchange = Column(DateTime, server_default=sqlalchemy.sql.func.now())
-    changedby = UUIDFKey(nullable=True)#Column(ForeignKey("users.id"), index=True, nullable=True)
-    createdby = UUIDFKey(nullable=True)#Column(ForeignKey("users.id"), index=True, nullable=True)
+    changedby = UUIDFKey(nullable=True)
+    # Column(ForeignKey("users.id"), index=True, nullable=True)
+    createdby = UUIDFKey(nullable=True)
+    # Column(ForeignKey("users.id"), index=True, nullable=True)

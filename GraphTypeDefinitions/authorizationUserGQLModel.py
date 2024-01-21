@@ -2,12 +2,14 @@ import datetime
 import uuid
 
 import strawberry
-from typing import Optional, Annotated, List
+from typing import Optional, Annotated
 
 from sqlalchemy.util import typing
+from dataclasses import dataclass
+from uoishelpers.resolvers import createInputs
 
 from GraphTypeDefinitions.BaseGQLModel import BaseGQLModel
-from ._GraphPermissions import RoleBasedPermission, OnlyForAuthentized
+from ._GraphPermissions import OnlyForAuthentized
 
 from GraphTypeDefinitions._GraphResolvers import (
     resolve_id,
@@ -68,11 +70,6 @@ async def authorization_user_by_id(
 ) -> typing.Optional[AuthorizationUserGQLModel]:
     return await AuthorizationUserGQLModel.resolve_reference(info=info, id=id)
 
-
-from dataclasses import dataclass
-from .utils import createInputs
-
-
 @createInputs
 @dataclass
 class AuthorizationUserWhereFilter:
@@ -88,12 +85,11 @@ authorization_user_by_id = createRootResolver_by_id(
     description="Returns authorization user by id")
 '''
 
-authorization_user_page = createRootResolver_by_page(
-    scalarType=AuthorizationUserGQLModel,
-    whereFilterType=AuthorizationUserWhereFilter,
-    description="Returns authorization user by page",
-    loaderLambda=lambda info: getLoadersFromInfo(info).authorizationusers
-)
+authorization_user_page = createRootResolver_by_page(scalar_type=AuthorizationUserGQLModel,
+                                                     where_filter_type=AuthorizationUserWhereFilter,
+                                                     loader_lambda=lambda info: getLoadersFromInfo(
+                                                         info).authorizationusers,
+                                                     description="Returns authorization user by page")
 
 
 #####################################################################
@@ -129,13 +125,13 @@ class AuthorizationUserDeleteGQLModel:
 @strawberry.type(description="""Result model for authorization user deletion""")
 class AuthorizationUserDeleteResultGQLModel:
     id: Optional[uuid.UUID] = strawberry.field(description="ID of deleted object if msg is ok")
-    msg: str = strawberry.field(description="""Should be `ok` if descired state has been reached, otherwise `fail`.""")
+    msg: str = strawberry.field(description="""Should be `ok` if desired state has been reached, otherwise `fail`.""")
 
 
 @strawberry.type(description="Result of CU operation over authorization user")
 class AuthorizationUserResultGQLModel:
     id: Optional[uuid.UUID] = strawberry.field(description="primary key of CU operation object")
-    msg: str = strawberry.field(description="""Should be `ok` if descired state has been reached, otherwise `fail`.
+    msg: str = strawberry.field(description="""Should be `ok` if desired state has been reached, otherwise `fail`.
     For update operation fail should be also stated when bad lastchange has been entered.""")
 
     @strawberry.field(description="subject of operation")

@@ -2,12 +2,14 @@ import datetime
 import uuid
 
 import strawberry
-from typing import Optional, Annotated, List
+from typing import Optional, Annotated
 
 from sqlalchemy.util import typing
+from dataclasses import dataclass
+from uoishelpers.resolvers import createInputs
 
 from GraphTypeDefinitions.BaseGQLModel import BaseGQLModel
-from ._GraphPermissions import RoleBasedPermission, OnlyForAuthentized
+from ._GraphPermissions import OnlyForAuthentized
 
 from GraphTypeDefinitions._GraphResolvers import (
     resolve_id,
@@ -20,7 +22,6 @@ from GraphTypeDefinitions._GraphResolvers import (
     createRootResolver_by_page,
 )
 from utils.Dataloaders import getLoadersFromInfo, getUserFromInfo
-from . import AuthorizationGroupGQLModel
 
 # Anotace na definici typů
 AuthorizationGQLModel = Annotated["AuthorizationGQLModel", strawberry.lazy(".authorizationGQLModel")]
@@ -51,18 +52,21 @@ class AuthorizationRoleTypeGQLModel(BaseGQLModel):
     createdby = resolve_createdby
     changedby = resolve_changedby
 
-    @strawberry.field(description="""Authorizations attached to this roletype""", permission_classes=[OnlyForAuthentized()])
+    @strawberry.field(description="""Authorizations attached to this roletype""",
+                      permission_classes=[OnlyForAuthentized()])
     async def authorization(self, info: strawberry.types.Info) -> Optional["AuthorizationGQLModel"]:
         loader = getLoadersFromInfo(info).authorization
         result = await loader.load(self.authorization_id)
         return result
 
-    @strawberry.field(description="""Proxy group attached to this roletype""", permission_classes=[OnlyForAuthentized()])
+    @strawberry.field(description="""Proxy group attached to this roletype""",
+                      permission_classes=[OnlyForAuthentized()])
     async def group(self) -> Optional["GroupGQLModel"]:
         from .externals import GroupGQLModel
         return GroupGQLModel(id=self.group_id)
 
-    @strawberry.field(description="""Proxy roletype attached to this roletype""", permission_classes=[OnlyForAuthentized()])
+    @strawberry.field(description="""Proxy roletype attached to this roletype""",
+                      permission_classes=[OnlyForAuthentized()])
     def roletype(self) -> Optional["RoleTypeGQLModel"]:
         from .externals import RoleTypeGQLModel
         return RoleTypeGQLModel(id=self.roletype_id)
@@ -74,8 +78,6 @@ class AuthorizationRoleTypeGQLModel(BaseGQLModel):
 #
 #####################################################################
 
-from dataclasses import dataclass
-from .utils import createInputs
 
 
 @createInputs
@@ -91,12 +93,11 @@ authorization_roletype_by_id = createRootResolver_by_id(
     AuthorizationRoleTypeGQLModel,
     description="""Returns authorization roletype by ID""")
 
-authorization_roletype_page = createRootResolver_by_page(
-    scalarType=AuthorizationRoleTypeGQLModel,
-    whereFilterType=AuthorizationRoleTypeWhereFilter,
-    description="""Returns authorization roletype by page""",
-    loaderLambda=lambda info: getLoadersFromInfo(info).authorizationroletypes
-)
+authorization_roletype_page = createRootResolver_by_page(scalar_type=AuthorizationRoleTypeGQLModel,
+                                                         where_filter_type=AuthorizationRoleTypeWhereFilter,
+                                                         loader_lambda=lambda info: getLoadersFromInfo(
+                                                             info).authorizationroletypes,
+                                                         description="""Returns authorization roletype by page""")
 
 
 #####################################################################
@@ -122,6 +123,7 @@ class AuthorizationRoleTypeUpdateGQLModel:
     id: uuid.UUID = strawberry.field(description="primary key (UUID), identifies object of operation")
     accesslevel: typing.Optional[int] = strawberry.field(description="access level", default=None)
     changedby: strawberry.Private[uuid.UUID] = None
+
 
 @strawberry.input(description="Input structure - D operation")
 class AuthorizationRoleTypeDeleteGQLModel:
@@ -176,6 +178,7 @@ async def authorization_roletype_update(
     result = AuthorizationRoleTypeResultGQLModel(id=row.id, msg="ok") if row else (
         AuthorizationRoleTypeResultGQLModel(id=authorization_roletype.id, msg="fail, bad lastchange"))
     return result
+
 
 @strawberry.mutation(description="Delete an existing authorization roletype", permission_classes=[OnlyForAuthentized()])
 async def authorization_roletype_delete(

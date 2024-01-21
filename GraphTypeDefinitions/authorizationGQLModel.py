@@ -1,11 +1,13 @@
 import uuid
 
 import strawberry
-from typing import List, Optional, Union, Annotated
+from typing import List, Union, Annotated
 
 from .BaseGQLModel import BaseGQLModel
 from utils.Dataloaders import getLoadersFromInfo
-from ._GraphPermissions import RoleBasedPermission, OnlyForAuthentized
+from ._GraphPermissions import OnlyForAuthentized
+from dataclasses import dataclass
+from uoishelpers.resolvers import createInputs
 
 from GraphTypeDefinitions._GraphResolvers import (
     resolve_id,
@@ -30,18 +32,6 @@ class AuthorizationGQLModel(BaseGQLModel):
     @classmethod
     def getLoader(cls, info):
         return getLoadersFromInfo(info).authorization
-
-    '''
-    # Metóda na riešenie referencie
-    @classmethod
-    async def resolve_reference(cls, info: strawberry.types.Info, id: strawberry.ID):
-        loader = getLoaders(info).authorizations
-        result = await loader.load(id)
-        if result is not None:
-            result._type_definition = cls._type_definition  # little hack :)
-            result.__strawberry_definition__ = cls._type_definition # some version of strawberry changed :(
-        return result
-    '''
 
     id = resolve_id
 
@@ -72,9 +62,6 @@ class AuthorizationGQLModel(BaseGQLModel):
 #
 #####################################################################
 
-from dataclasses import dataclass
-from .utils import createInputs
-
 
 @createInputs
 @dataclass
@@ -87,12 +74,10 @@ authorization_by_id = createRootResolver_by_id(
     AuthorizationGQLModel,
     description="Retrieves the authorization")
 
-authorization_page = createRootResolver_by_page(
-    scalarType=AuthorizationGQLModel,
-    whereFilterType=AuthorizationWhereFilter,
-    description="Retrieves authorizations paged",
-    loaderLambda=lambda info: getLoadersFromInfo(info).authorization
-)
+authorization_page = createRootResolver_by_page(scalar_type=AuthorizationGQLModel,
+                                                where_filter_type=AuthorizationWhereFilter,
+                                                loader_lambda=lambda info: getLoadersFromInfo(info).authorization,
+                                                description="Retrieves authorizations paged")
 
 
 #####################################################################
@@ -111,6 +96,7 @@ class AuthorizationInsertGQLModel:
 class AuthorizationResultGQLModel:
     id: strawberry.ID = None
     msg: str = None
+
     @strawberry.field(description="""Result of authorization operation""")
     async def authorization(self, info: strawberry.types.Info) -> Union[AuthorizationGQLModel, None]:
         result = await AuthorizationGQLModel.resolve_reference(info, self.id)
@@ -124,5 +110,5 @@ async def authorization_insert(
 ) -> AuthorizationResultGQLModel:
     loader = getLoadersFromInfo(info).authorization
     row = await loader.insert(authorization)
-    result = AuthorizationResultGQLModel(id=row.id, msg= "ok")
+    result = AuthorizationResultGQLModel(id=row.id, msg="ok")
     return result

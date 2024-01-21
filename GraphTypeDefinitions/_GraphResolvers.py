@@ -124,35 +124,35 @@ def createAttributeVectorResolver(
 '''
 
 
-def createRootResolver_by_id(scalarType: None, description="Retrieves item by its id"):
-    assert scalarType is not None
+def createRootResolver_by_id(scalar_type: typing.Any, description="Retrieves item by its id"):
+    assert scalar_type is not None
 
     @strawberry.field(description=description)
     async def by_id(
             self, info: strawberry.types.Info, id: uuid.UUID
-    ) -> typing.Optional[scalarType]:
-        result = await scalarType.resolve_reference(info=info, id=id)
+    ) -> typing.Optional[scalar_type]:
+        result = await scalar_type.resolve_reference(info=info, id=id)
         return result
 
     return by_id
 
 
 def createRootResolver_by_page(
-        scalarType: None,
-        whereFilterType: None,
-        loaderLambda=lambda info: None,
+        scalar_type: typing.Any,
+        where_filter_type: typing.Any,
+        loader_lambda=lambda info: None,
         description="Retrieves items paged",
         skip: int = 0,
         limit: int = 10):
-    assert scalarType is not None
-    assert whereFilterType is not None
+    assert scalar_type is not None
+    assert where_filter_type is not None
 
     @strawberry.field(description=description)
     async def paged(
             self, info: strawberry.types.Info,
-            skip: int = skip, limit: int = limit, where: typing.Optional[whereFilterType] = None
-    ) -> typing.List[scalarType]:
-        loader = loaderLambda(info)
+            skip: int = skip, limit: int = limit, where: typing.Optional[where_filter_type] = None
+    ) -> typing.List[scalar_type]:
+        loader = loader_lambda(info)
         assert loader is not None
         wf = None if where is None else strawberry.asdict(where)
         result = await loader.page(skip=skip, limit=limit, where=wf)
