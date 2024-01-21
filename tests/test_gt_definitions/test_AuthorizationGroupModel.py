@@ -1,15 +1,4 @@
-import pytest
-from GraphTypeDefinitions import schema
-
-
-from tests.shared import (
-    prepare_demodata,
-    prepare_in_memory_sqllite,
-    get_demodata,
-    create_context,
-)
-
-from tests.gqlshared import (
+from .gt_utils import (
     create_by_id_test,
     create_page_test,
     create_resolve_reference_test,

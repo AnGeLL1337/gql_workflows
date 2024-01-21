@@ -6,7 +6,7 @@ import uuid
 @pytest_asyncio.fixture
 async def GQLInsertQueries():
     result = {
-        "authorizations": {
+        "awauthorizations": {
             "create": """
 mutation ($id: UUID!) {
   authorizationInsert(

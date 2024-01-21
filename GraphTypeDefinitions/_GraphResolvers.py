@@ -14,41 +14,19 @@ def resolve_id(self) -> uuid.UUID:
     return self.id
 
 
-@strawberry.field(description="""Authorization id """)
-def resolve_authorization_id(self) -> uuid.UUID:
-    return self.authorization_id
-
-
-async def resolve_group(group_id):
-    from .externals import GroupGQLModel
-    result = None if group_id is None else await GroupGQLModel.resolve_reference(group_id)
-    return result
-
-
-@strawberry.field(description="""Group ID""")
-async def resolve_group_id(self) -> typing.Optional["GroupGQLModel"]:
-    return await resolve_group(self.group_id)
-
-
 async def resolve_user(user_id):
     from .externals import UserGQLModel
-    result = None if user_id is None else await UserGQLModel.resolve_reference(user_id)
-    return result
-
-
-@strawberry.field(description="""User ID """)
-async def resolve_user_id(self) -> typing.Optional["UserGQLModel"]:
-    return await resolve_user(self.user_id)
-
-
-async def resolve_roletype(roletype_id):
-    from .externals import RoleTypeGQLModel
-    result = None if roletype_id is None else await RoleTypeGQLModel.resolve_reference(roletype_id)
-    return result
-
-@strawberry.field(description="""Role Type ID """)
-async def resolve_roletype_id(self) -> typing.Optional["RoleTypeGQLModel"]:
-    return await resolve_roletype(self.roletype_id)
+    if user_id is None:
+        return None
+    # Debugging
+    # print(f"Resolving user for ID: {user_id}")
+    try:
+        result = await UserGQLModel.resolve_reference(id=user_id, info=None)
+        return result
+    except Exception as e:
+        # Log the error for debugging
+        print(f"Error resolving user: {e}")
+        return None
 
 
 @strawberry.field(description="""Level of authorization""")
@@ -68,7 +46,7 @@ def resolve_created(self) -> typing.Optional[datetime.datetime]:
 
 @strawberry.field(description="""Who created entity""")
 async def resolve_createdby(self) -> typing.Optional["UserGQLModel"]:
-    return await resolve_user(self.created_by)
+    return await resolve_user(self.createdby)
 
 
 @strawberry.field(description="""Who made last change""")
@@ -91,7 +69,7 @@ resolve_cu_result_msg = strawberry.field(graphql_type=str, description="""Should
 For update operation fail should be also stated when bad lastchange has been entered.""")
 
 
-
+'''
 def createAttributeScalarResolver(
     scalarType: None = None,
     foreignKeyName: str = None,
@@ -142,6 +120,8 @@ def createAttributeVectorResolver(
         return result
 
     return foreignkeyVector
+
+'''
 
 
 def createRootResolver_by_id(scalarType: None, description="Retrieves item by its id"):

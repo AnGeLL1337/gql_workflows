@@ -5,9 +5,9 @@ import uuid
 def uuidstr():
     return f"{uuid.uuid1()}"
 
-
-from gt_utils import createFrontendQuery
-_test_request_permitted = createFrontendQuery(
+'''
+from .gqlshared import create_frontend_query
+_test_request_permitted = create_frontend_query(
     query="""query ($id: UUID!) {
         requestById(id: $id) {
             id
@@ -17,36 +17,14 @@ _test_request_permitted = createFrontendQuery(
             histories { id }
         }
     }""",
-    variables={"id": "a854adb9-b29a-4062-95b3-cfd685071f16"}
+    variables={"id": "16c92914-0f71-437d-ace3-9661abe4c6cd"}
 )
-
+'''
 # def test_raise(AccessToken):
 #     print(AccessToken)
 #     assert False
 
 import pytest
-
-@pytest.mark.asyncio
-async def test_low_role_say_hello(DemoFalse, OAuthServer, ClientExecutorNoDemo, Env_GQLUG_ENDPOINT_URL_8123):
-    GQLUG_ENDPOINT_URL = os.environ.get("GQLUG_ENDPOINT_URL", None)
-    logging.info(f"test_low_role GQLUG_ENDPOINT_URL: \n{GQLUG_ENDPOINT_URL}")
-    DEMO = os.environ.get("DEMO", None)
-    logging.info(f"test_low_role DEMO: {DEMO}")
-    query = """
-    query($id: UUID!) { 
-        result: sayHelloAuthorization(id: $id)
-    }
-    """
-    variable_values = {"id": "a854adb9-b29a-4062-95b3-cfd685071f16"}
-    result = await ClientExecutorNoDemo(query=query, variable_values=variable_values)
-    logging.info(f"test_low_role_say_hello: \n {result}")
-    print(result)
-    errors = result.get("errors", None)
-    assert errors is None, result
-
-
-
-
 @pytest.mark.asyncio
 async def test_demo_role(DemoFalse, ClientExecutorAdmin, FillDataViaGQL, Context, Env_GQLUG_ENDPOINT_URL_8124):
     GQLUG_ENDPOINT_URL = os.environ.get("GQLUG_ENDPOINT_URL", None)
@@ -55,12 +33,13 @@ async def test_demo_role(DemoFalse, ClientExecutorAdmin, FillDataViaGQL, Context
     logging.info(f"test_low_role DEMO: {DEMO}")
     query = """
     query($id: UUID!) { 
-        result: authorizationById(id: $id) { 
-            id           
+        result: authorizationUserById(id: $id) { 
+            id
+            accesslevel
         }
     }
     """
-    variable_values = {"id": "a854adb9-b29a-4062-95b3-cfd685071f16"}
+    variable_values = {"id": "16c92914-0f71-437d-ace3-9661abe4c6cd"}
     result = await ClientExecutorAdmin(query=query, variable_values=variable_values)
     logging.info(f"test_demo_role result: \n {result}")
     print(result)
@@ -79,12 +58,13 @@ async def test_low_role(DemoFalse, ClientExecutorNoAdmin, FillDataViaGQL, Contex
     logging.info(f"test_low_role DEMO: {DEMO}")
     query = """
     query($id: UUID!) { 
-        result: authorizationById(id: $id) { 
-            id           
+        result: authorizationUserById(id: $id) { 
+            id
+            accesslevel
         }
     }
     """
-    variable_values = {"id": "a854adb9-b29a-4062-95b3-cfd685071f16"}
+    variable_values = {"id": "16c92914-0f71-437d-ace3-9661abe4c6cd"}
     result = await ClientExecutorNoAdmin(query=query, variable_values=variable_values)
     logging.info(f"test_demo_role result: \n {result}")
     print(result)
@@ -103,12 +83,13 @@ async def test_low_role2(DemoFalse, ClientExecutorNoAdmin2, FillDataViaGQL, Cont
    logging.info(f"test_low_role DEMO: {DEMO}")
    query = """
    query($id: UUID!) { 
-       result: authorizationById(id: $id) { 
-           id          
-       }
-   }
+        result: authorizationUserById(id: $id) { 
+            id
+            accesslevel
+        }
+    }
    """
-   variable_values = {"id": "a854adb9-b29a-4062-95b3-cfd685071f16"}
+   variable_values = {"id": "16c92914-0f71-437d-ace3-9661abe4c6cd"}
    result = await ClientExecutorNoAdmin2(query=query, variable_values=variable_values)
    logging.info(f"test_demo_role got for query \n {query} \n\t with variables \n {variable_values} \n\t the result: \n {result}")
    print(result)

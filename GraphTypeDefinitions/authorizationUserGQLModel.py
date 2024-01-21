@@ -11,14 +11,11 @@ from ._GraphPermissions import RoleBasedPermission, OnlyForAuthentized
 
 from GraphTypeDefinitions._GraphResolvers import (
     resolve_id,
-    resolve_authorization_id,
-    resolve_user_id,
     resolve_accesslevel,
     resolve_created,
     resolve_lastchange,
     resolve_createdby,
     resolve_changedby,
-    createRootResolver_by_id,
     createRootResolver_by_page,
 )
 from utils.Dataloaders import getLoadersFromInfo, getUserFromInfo
@@ -58,7 +55,6 @@ class AuthorizationUserGQLModel(BaseGQLModel):
         result = await loader.load(self.authorization_id)
         return result
 
-
 #####################################################################
 #
 # Special fields for query
@@ -83,6 +79,7 @@ class AuthorizationUserWhereFilter:
     authorization_id: uuid.UUID
     user_id: uuid.UUID
     accesslevel: int
+    createdby: uuid.UUID
 
 
 '''
@@ -178,6 +175,6 @@ async def authorization_user_delete(
     user_id_to_delete = authorization_user_id.id
     loader = getLoadersFromInfo(info).authorizationusers
     row = await loader.delete(user_id_to_delete)
-    result = AuthorizationUserDeleteResultGQLModel(id=user_id_to_delete, msg="ok") if row else (
+    result = AuthorizationUserDeleteResultGQLModel(id=user_id_to_delete, msg="ok") if row is not None else (
         AuthorizationUserDeleteResultGQLModel(id=user_id_to_delete, msg="fail, user not found"))
     return result

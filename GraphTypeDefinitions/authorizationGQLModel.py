@@ -5,6 +5,7 @@ from typing import List, Optional, Union, Annotated
 
 from .BaseGQLModel import BaseGQLModel
 from utils.Dataloaders import getLoadersFromInfo
+from ._GraphPermissions import RoleBasedPermission, OnlyForAuthentized
 
 from GraphTypeDefinitions._GraphResolvers import (
     resolve_id,
@@ -44,19 +45,22 @@ class AuthorizationGQLModel(BaseGQLModel):
 
     id = resolve_id
 
-    @strawberry.field(description="""Proxy users attached to this authorization""")
+    @strawberry.field(description="""Proxy users attached to this authorization""",
+                      permission_classes=[OnlyForAuthentized(isList=True)])
     async def users(self, info: strawberry.types.Info) -> List["AuthorizationUserGQLModel"]:
         loader = getLoadersFromInfo(info).authorizationusers
         result = await loader.filter_by(authorization_id=self.id)
         return result
 
-    @strawberry.field(description="""Proxy groups attached to this authorization""")
+    @strawberry.field(description="""Proxy groups attached to this authorization""",
+                      permission_classes=[OnlyForAuthentized(isList=True)])
     async def groups(self, info: strawberry.types.Info) -> List["AuthorizationGroupGQLModel"]:
         loader = getLoadersFromInfo(info).authorizationgroups
         result = await loader.filter_by(authorization_id=self.id)
         return result
 
-    @strawberry.field(description="""Proxy role types attached to this authorization""")
+    @strawberry.field(description="""Proxy role types attached to this authorization""",
+                      permission_classes=[OnlyForAuthentized(isList=True)])
     async def role_types(self, info: strawberry.types.Info) -> List["AuthorizationRoleTypeGQLModel"]:
         loader = getLoadersFromInfo(info).authorizationroletypes
         result = await loader.filter_by(authorization_id=self.id)
@@ -77,6 +81,7 @@ from .utils import createInputs
 class AuthorizationWhereFilter:
     name: str
     name_en: str
+
 
 authorization_by_id = createRootResolver_by_id(
     AuthorizationGQLModel,
@@ -112,7 +117,8 @@ class AuthorizationResultGQLModel:
         return result
 
 
-@strawberry.mutation(description="""Creates a new authorization""")
+@strawberry.mutation(description="""Creates a new authorization""",
+                     permission_classes=[OnlyForAuthentized()])
 async def authorization_insert(
         self, info: strawberry.types.Info,authorization: AuthorizationInsertGQLModel
 ) -> AuthorizationResultGQLModel:

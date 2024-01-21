@@ -11,9 +11,6 @@ from ._GraphPermissions import RoleBasedPermission, OnlyForAuthentized
 
 from GraphTypeDefinitions._GraphResolvers import (
     resolve_id,
-    resolve_authorization_id,
-    resolve_group_id,
-    resolve_roletype_id,
     resolve_accesslevel,
     resolve_created,
     resolve_lastchange,
@@ -48,9 +45,6 @@ class AuthorizationRoleTypeGQLModel(BaseGQLModel):
         return getLoadersFromInfo(info).authorizationroletypes
 
     id = resolve_id
-    # group_id = resolve_group_id
-    # roletype_id = resolve_roletype_id
-    # authorization_id = resolve_authorization_id
     accesslevel = resolve_accesslevel
     created = resolve_created
     lastchange = resolve_lastchange

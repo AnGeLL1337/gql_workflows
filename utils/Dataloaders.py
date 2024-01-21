@@ -158,6 +158,8 @@ def prepareSelect(model, where: dict):
     return result
 
 '''
+
+
 @cache
 def composeAuthUrl():
     hostname = os.environ.get("AUTHURL", "http://localhost:8088/gql")
@@ -166,6 +168,7 @@ def composeAuthUrl():
     return hostname
 
 
+'''  Neni potrebné pre nás
 class AuthorizationLoader(DataLoader):
     query = """
         query ($id: ID!) {
@@ -191,13 +194,20 @@ class AuthorizationLoader(DataLoader):
                  query=query,
                  demo=True):
         super().__init__(cache=True)
-        self.roleUrlEndpoint = roleUrlEndpoint
+        self.roleUrlEndpoint = roleUrlEndpoint if roleUrlEndpoint else composeAuthUrl()
         self.query = query
         self.demo = demo
+        self.authorizationToken = ""
+
+    def setTokenByInfo(self, info):
+        self.authorizationToken = ""
 
     async def _load(self, id):
         variables = {"id": f"{id}"}
-        headers = {}
+        if self.authorizationToken != "":
+            headers = {"authorization": f"Bearer {self.authorizationToken}"}
+        else:
+            headers = {}
         json = {
             "query": self.query,
             "variables": variables
@@ -214,26 +224,31 @@ class AuthorizationLoader(DataLoader):
                 else:
                     respJson = await resp.json()
 
-        print(respJson)
+        # print(20*"respJson")
+        # print(respJson)
 
-        assert respJson.get("errors", None) is None
+        assert respJson.get("errors", None) is None, respJson["errors"]
         respdata = respJson.get("data", None)
-        assert respdata is not None
-        rolesOnUser = respdata.get("rolesOnUser", None)
-        rolesOnGroup = respdata.get("rolesOnGroup", None)
-        assert rolesOnUser is not None
-        assert rolesOnGroup is not None
+        assert respdata is not None, "missing data response"
+        result = respdata.get("result", None)
+        assert result is not None, "missing result"
+        roles = result.get("roles", None)
+        assert roles is not None, "missing roles"
 
-        return [*rolesOnUser, *rolesOnGroup]
+        # print(30*"=")
+        # print(roles)
+        # print(30*"=")
+        return [*roles]
 
     async def batch_load_fn(self, keys):
         # print('batch_load_fn', keys, flush=True)
         reducedkeys = set(keys)
         awaitables = (self._load(key) for key in reducedkeys)
         results = await asyncio.gather(*awaitables)
-        indexedResult = {key: result for key, result in zip(reducedkeys, results)}
+        indexedResult = {key:result for key, result in zip(reducedkeys, results)}
         results = [indexedResult[key] for key in keys]
         return results
+'''
 
 '''
 def createIdLoader(asyncSessionMaker, dbModel):
@@ -338,6 +353,8 @@ def createIdLoader(asyncSessionMaker, dbModel):
     return Loader(cache=True)
 
 '''
+
+
 class Loaders:
     authorization = None
     authorizationgroups = None
@@ -348,13 +365,6 @@ class Loaders:
 
 def createLoaders(asyncSessionMaker, models=dbmodels) -> Loaders:
     class Loaders:
-
-        @property
-        @cache
-        # TODO: Možno budeme musieť zmazať
-        def authorizations(self):
-            return AuthorizationLoader()
-
         @property
         @cache
         def authorization(self):
@@ -450,13 +460,15 @@ def createLoadersContext(asyncSessionMaker):
     return {
         "loaders": createLoaders(asyncSessionMaker)
     }
-    
+
+
 def createUgConnectionContext(request):
     from .gql_ug_proxy import get_ug_connection
     connection = get_ug_connection(request=request)
     return {
         "ug_connection": connection
     }
+
 
 def getUgConnection(info):
     context = info.context

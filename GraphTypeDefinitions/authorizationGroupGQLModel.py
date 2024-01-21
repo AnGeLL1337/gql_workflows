@@ -11,8 +11,6 @@ from ._GraphPermissions import RoleBasedPermission, OnlyForAuthentized
 
 from GraphTypeDefinitions._GraphResolvers import (
     resolve_id,
-    resolve_authorization_id,
-    resolve_group_id,
     resolve_accesslevel,
     resolve_created,
     resolve_lastchange,
