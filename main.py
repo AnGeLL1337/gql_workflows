@@ -2,6 +2,7 @@ from typing import Any, List
 import logging
 import os
 from pydantic import BaseModel
+from dotenv import load_dotenv
 
 import logging
 import logging.handlers
@@ -158,6 +159,7 @@ async def apollo_gql(request: Request, item: Item):
 #         JWTPUBLICKEY = JWTPUBLICKEY,
 #         JWTRESOLVEUSERPATH = JWTRESOLVEUSERPATH
 # ))
+load_dotenv(".env")
 
 DEMO = os.getenv("DEMO", None)
 assert DEMO is not None, "DEMO environment variable must be explicitly defined"
