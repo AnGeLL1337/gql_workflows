@@ -159,7 +159,7 @@ async def apollo_gql(request: Request, item: Item):
 #         JWTPUBLICKEY = JWTPUBLICKEY,
 #         JWTRESOLVEUSERPATH = JWTRESOLVEUSERPATH
 # ))
-load_dotenv(".env")
+load_dotenv("environment.env")
 
 DEMO = os.getenv("DEMO", None)
 assert DEMO is not None, "DEMO environment variable must be explicitly defined"
