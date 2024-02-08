@@ -1,43 +1,52 @@
 # Queries
 
-Page Queries:
+**AuthorizationPage:**
 ```graphql
 query AuthorizationPage {
   authorizationPage {
     id
-    groups {
-      id
-    }
     roleTypes {
       id
+      accesslevel
+      created
+      authorization {
+        id
+      }
     }
     users {
       id
+      accesslevel
+      created
+      lastchange
+    }
+    groups {
+      id
+      accesslevel
+      created
+      lastchange
     }
   }
 }
-
+```
+**AuthorizationGroupPage:**
+```graphql
 query authorizationGroupPage {
   authorizationGroupPage {
     accesslevel
-    authorization {
-      id
-    }
-    changedby {
-      id
-    }
     created
-    createdby {
+    id
+    lastchange
+    authorization {
       id
     }
     group {
       id
     }
-    id
-    lastchange
   }
 }
-
+```
+**AuthorizationRoletypePage:**
+```graphql
 query authorizationRoletypePage {
   authorizationRoletypePage {
     id
@@ -61,7 +70,9 @@ query authorizationRoletypePage {
     }
   }
 }
-
+```
+**AuthorizationUserPage:**
+```graphql
 query authorizationUserPage {
   authorizationUserPage {
     authorization {
@@ -81,18 +92,22 @@ query authorizationUserPage {
 }
 ```
 
-By ID Queries:
+**AuthorizationGroupById:**
 ```graphql
-query authorizationGroupById {
-  authorizationGroupById(id: "4390a9cc-4751-482c-932b-908f0354380e") {
+query authorizationGroupById($groupId: UUID!) {
+  authorizationGroupById(id: $groupId) {
     id
     accesslevel
     lastchange
   }
-}
+}, 
+variables={"groupId": "4390a9cc-4751-482c-932b-908f0354380e"}
+```
 
-query AuthorizationById {
-  authorizationById(id: "a854adb9-b29a-4062-95b3-cfd685071f16") {
+**AuthorizationById:**
+```graphql
+query AuthorizationById($authorizationId: UUID!) {
+  authorizationById(id: $authorizationId) {
     id
     groups {
       id
@@ -107,10 +122,14 @@ query AuthorizationById {
       accesslevel
     }
   }
-}
+},
+variables={"authorizationId": "a854adb9-b29a-4062-95b3-cfd685071f16"}
+```
 
-query authorizationRoletypeById {
-  authorizationRoletypeById(id: "1125f3ed-cf55-4a57-9eb7-7e8f1447b9b0") {
+**AuthorizationRoletypeById:**
+```graphql
+query authorizationRoletypeById($roletypeId: UUID!) {
+  authorizationRoletypeById(id: $roletypeId) {
     id
     lastchange
     accesslevel
@@ -128,10 +147,14 @@ query authorizationRoletypeById {
       id
     }
   }
-}
+},
+variables={"roletypeId": "1125f3ed-cf55-4a57-9eb7-7e8f1447b9b0"}
+```
 
-query authorizationUserById {
-  authorizationUserById(id: "16c92914-0f71-437d-ace3-9661abe4c6cd") {
+**AuthorizationUserById:**
+```graphql
+query authorizationUserById($userId: UUID!) {
+  authorizationUserById(id: $userId) {
     id
     lastchange
     accesslevel
@@ -146,14 +169,15 @@ query authorizationUserById {
       id
     }
   }
-}
+},
+variables={"userId": "16c92914-0f71-437d-ace3-9661abe4c6cd"}
 ```
 
-Group Queries:
+**AuthorizationGroupInsert:**
 ```graphql
-mutation authorizationGroupInsert {
+mutation authorizationGroupInsert($authorizationId: UUID!, $groupId: UUID!, $accesslevel: Int!, $id: UUID) {
   authorizationGroupInsert(
-    authorizationGroup: {authorizationId: "a854adb9-b29a-4062-95b3-cfd685071f16", groupId: "2d9dcd22-a4a2-11ed-b9df-0242ac120003", accesslevel: 5, id: "4390a9cc-4751-482c-932b-908f0354380f"}
+    authorizationGroup: {authorizationId: $authorizationId, groupId: $groupId, accesslevel: $accesslevel, id: $id}
   ) {
     id
     msg
@@ -163,11 +187,20 @@ mutation authorizationGroupInsert {
       accesslevel
     }
   }
+},
+variables={
+    "authorizationId": "a854adb9-b29a-4062-95b3-cfd685071f16",
+    "groupId": "2d9dcd22-a4a2-11ed-b9df-0242ac120003",
+    "accesslevel": 5,
+    "id": "4390a9cc-4751-482c-932b-908f0354380f"
 }
+```
 
-mutation authorizationGroupUpdate {
+**AuthorizationGroupUpdate:**
+```graphql
+mutation authorizationGroupUpdate($lastchange: DateTime!, $id: UUID!, $accesslevel: Int) {
   authorizationGroupUpdate(
-    authorizationGroup: {lastchange: "2024-01-21T00:24:52.653712", id: "4390a9cc-4751-482c-932b-908f0354380f", accesslevel: 10}
+    authorizationGroup: {lastchange: $lastchange, id: $id, accesslevel: $accesslevel}
   ) {
     id
     msg
@@ -177,22 +210,31 @@ mutation authorizationGroupUpdate {
       lastchange
     }
   }
+},
+variables={
+    "lastchange": "2024-01-21T00:32:15.027645",
+    "id": "4390a9cc-4751-482c-932b-908f0354380f",
+    "accesslevel": 10
 }
+```
 
-mutation authorizationGroupDelete {
+**AuthorizationGroupDelete:**
+```graphql
+mutation authorizationGroupDelete($id: UUID!) {
   authorizationGroupDelete(
-    authorizationGroupId: {id: "4390a9cc-4751-482c-932b-908f0354380f"}) {
+    authorizationGroupId: {id: $id}) {
     id
     msg
   }
-}
+},
+variables={"id": "4390a9cc-4751-482c-932b-908f0354380f"}
 ```
 
-RoleType Queries:
+**AuthorizationRoletypeInsert**:
 ```graphql
-mutation authorizationRoletypeInsert {
+mutation authorizationRoletypeInsert($authorizationId: UUID!, $groupId: UUID!, $roletypeId: UUID!, $accesslevel: Int!, $id: UUID) {
   authorizationRoletypeInsert(
-    authorizationRoletype: {authorizationId: "a854adb9-b29a-4062-95b3-cfd685071f16", groupId: "2d9dcd22-a4a2-11ed-b9df-0242ac120003", roletypeId: "05a3e0f5-f71e-4caa-8012-229d868aa8ca", accesslevel: 5, id: "1125f3ed-cf55-4a57-9eb7-7e8f1447b9b1"}
+    authorizationRoletype: {authorizationId: $authorizationId, groupId: $groupId, roletypeId: $roletypeId, accesslevel: $accesslevel, id: $id}
   ) {
     id
     msg
@@ -202,35 +244,54 @@ mutation authorizationRoletypeInsert {
       accesslevel
     }
   }
-}
-
-mutation authorizationRoletypeUpdate {
-  authorizationRoletypeUpdate(
-    authorizationRoletype: {lastchange: "2024-01-21T00:32:15.027645", id: "1125f3ed-cf55-4a57-9eb7-7e8f1447b9b1", accesslevel: 10}
-  ) {
-    id
-    msg
-    authorizationRoletype {
-      id
-      lastchange
-      accesslevel
-    }
-  }
-}
-
-mutation authorizationRoletypeDelete {
-  authorizationRoletypeDelete(authorizationRoletypeId: {id: "1125f3ed-cf55-4a57-9eb7-7e8f1447b9b1"}) {
-    id
-    msg
-  }
+},
+variables={
+    "authorizationId": "a854adb9-b29a-4062-95b3-cfd685071f16",
+    "groupId": "2d9dcd22-a4a2-11ed-b9df-0242ac120003",
+    "roletypeId": "05a3e0f5-f71e-4caa-8012-229d868aa8ca",
+    "accesslevel": 5,
+    "id": "1125f3ed-cf55-4a57-9eb7-7e8f1447b9b1"
 }
 ```
 
-User Queries:
+**AuthorizationRoletypeUpdate**:
 ```graphql
-mutation authorizationUserInsert {
+mutation authorizationRoletypeUpdate($lastchange: DateTime!, $id: UUID!, $accesslevel: Int) {
+  authorizationRoletypeUpdate(
+    authorizationRoletype: {lastchange: $lastchange, id: $id, accesslevel: $accesslevel}
+  ) {
+    id
+    msg
+    authorizationRoletype {
+      id
+      lastchange
+      accesslevel
+    }
+  }
+},
+variables={
+    "lastchange": "2024-02-08T20:10:43.519105",
+    "id": "1125f3ed-cf55-4a57-9eb7-7e8f1447b9b1",
+    "accesslevel": 10
+}
+```
+
+**AuthorizationRoletypeDelete**:
+```graphql
+mutation authorizationRoletypeDelete($id: UUID!) {
+  authorizationRoletypeDelete(authorizationRoletypeId: {id: $id}) {
+    id
+    msg
+  }
+},
+variables={"id": "1125f3ed-cf55-4a57-9eb7-7e8f1447b9b1"}
+```
+
+**authorizationUserInsert**:
+```graphql
+mutation authorizationUserInsert($authorizationId: UUID!, $userId: UUID!, $accesslevel: Int!, $id: UUID) {
   authorizationUserInsert(
-    authorizationUser: {authorizationId: "a854adb9-b29a-4062-95b3-cfd685071f16", userId: "2d9dc5ca-a4a2-11ed-b9df-0242ac120003", accesslevel: 5, id: "16c92914-0f71-437d-ace3-9661abe4c6ce"}
+    authorizationUser: {authorizationId: $authorizationId, userId: $userId, accesslevel: $accesslevel, id: $id}
   ) {
     id
     msg
@@ -240,11 +301,20 @@ mutation authorizationUserInsert {
       accesslevel
     }
   }
+},
+variables={
+  "authorizationId": "a854adb9-b29a-4062-95b3-cfd685071f16",
+  "userId": "2d9dc5ca-a4a2-11ed-b9df-0242ac120003",
+  "accesslevel": 5,
+  "id": "16c92914-0f71-437d-ace3-9661abe4c6ce"
 }
+```
 
-mutation authorizationUserUpdate {
+**authorizationUserUpdate**:
+```graphql
+mutation authorizationUserUpdate($lastchange: DateTime!, $id: UUID!, $accesslevel: Int) {
   authorizationUserUpdate(
-    authorizationUser: {lastchange: "2024-01-21T00:29:04.984821", id: "16c92914-0f71-437d-ace3-9661abe4c6ce", accesslevel: 10}
+    authorizationUser: {lastchange: $lastchange, id: $id, accesslevel: $accesslevel}
   ) {
     id
     msg
@@ -254,12 +324,21 @@ mutation authorizationUserUpdate {
       accesslevel
     }
   }
+},
+variables={
+  "lastchange": "2024-02-08T19:56:24.132917",
+  "id": "16c92914-0f71-437d-ace3-9661abe4c6ce",
+  "accesslevel": 10
 }
+```
 
-mutation authorizationUserDelete {
-  authorizationUserDelete(authorizationUserId: {id: "16c92914-0f71-437d-ace3-9661abe4c6ce"}) {
+**authorizationUserDelete**:
+```graphql
+mutation authorizationUserDelete($id: UUID!) {
+  authorizationUserDelete(authorizationUserId: {id: $id}) {
     id
     msg
   }
-}
+},
+variables={"id": "16c92914-0f71-437d-ace3-9661abe4c6ce"}
 ```

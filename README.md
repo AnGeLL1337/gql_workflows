@@ -13,19 +13,29 @@
 * 16.10. - příprava na 1. projektový den, vytvořený GitHub repository, zprovozněný Docker
 * 23.10. - 26.11. - bližší seznámení s projektem, porozuměmní technikám, příprava na 2. projektový den, příprava RU operací
 * 27.11. - prezentace postupu na 2. projektovém dnu
+* 27.11. - 8.12. - implementace CRU operací
+* 10.12. - začiatok testování
+* 11.12. - 13.12. - oprava chyb, testování
+* 5.1 - 10.1 - permission classes
+* 11.1 - 20.1 - finalizace, testování, oprava chyb
 
+## Spustenie testov
 ```bash
 pytest --cov-report term-missing --cov=DBDefinitions --cov=GraphTypeDefinitions --cov=utils --log-cli-level=INFO -x
 ```
 
+## Spustenie aplikácie s .env file
 ```bash
-uvicorn main:app --env-file environment.txt --reload
+uvicorn main:app --env-file .\.env --reload
+
 ```
 
+## Push na origin/latest branch
 ```bash
 git push origin refs/heads/latest:refs/heads/latest
 ```
 
+## .env file
 ```
 DEMO=True
 DEMOUSER={"id": "2d9dc5ca-a4a2-11ed-b9df-0242ac120003", "name": "John", "surname": "Newbie"}
@@ -34,7 +44,7 @@ JWTRESOLVEUSERPATH=http://localhost:8000/oauth/userinfo
 GQLUG_ENDPOINT_URL=http://localhost:8000/gql
 ```
 
-Pytest coverage report
+## Pytest coverage report
 ```text
 ---------- coverage: platform win32, python 3.10.5-final-0 -----------
 Name                                                    Stmts   Miss  Cover   Missing
